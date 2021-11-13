@@ -2,7 +2,7 @@
 --  Info                --
 --------------------------
 _addon.name = 'AutoWS'
-_addon.version = '1.1'
+_addon.version = '1.2'
 _addon.author = 'BlueGlenn'
 _addon.commands = { 'autows', 'aws' }
 
@@ -14,65 +14,40 @@ require('logger')
 require('tables')
 require('strings')
 res = require('resources')
-file = require('files')
-packets = require('packets')
-
---------------------------
---  Constants           --
---------------------------
-CONST_DELAY = 2
 
 --------------------------
 --  System Objects      --
 --------------------------
 all_weapon_skills = {}
-last_weapon_skill_damage = 0
-weapon_skill_useage_count = 0
 
 --------------------------
 --  User Settings       --
 --------------------------
 weapon_skill = {}
 tp_threshold = 1000
-execute = false
 run = false
 
 ----------------------------------
 --  Command Handler Functions   --
 ----------------------------------
 function handle_help()
-	local CONST_TITLE_COLOR = 16 -- pink
-	local CONST_COMMAND_COLOR = 222 -- cyan
-	local CONST_HELPER_COLOR = 220 -- blue
-	local CONST_TEXT_COLOR = 100 -- yellow
-	local CONST_NEWLINE = '\n'
-	
-    local instruction_lines = {
-		['//aws ws \"weapon_skill_name\"'] = "Set your desired weapon skill (no default, you MUST set this, and it MUST be in quotes).",
-		['//aws tp 1000-3000'] = "Set your desired tp threshold (the tp at which your weapon skill will be used.  Default is 1000).",
-		['//aws execute on/off'] = "Set whether or not you want to use execute mode (only use your weapon skill to finish off an enemy WARNING: will use WS one time permaturely in order to gauge how much damage your WS is doing. Default is off).",
-		['//aws start'] = "Once the above settings are in, start AutoWS.",
-		['//aws stop'] = "Stop AutoWS.",
-		['//aws settings'] = "Display your current settings."
+    local INDENT = ' ':rep(3)
+    local help_lines = 
+    {
+        '-- AutoWS (a simple addon by BlueGlenn) --',
+        'Commands:',
+        INDENT..'//aws ws \"weapon_skill_name\":'..INDENT..'Set your desired weapon skill',
+        INDENT:rep(2)..'- no default, you MUST set this, and it MUST be in quotes',
+        INDENT..'//aws tp 1000-3000:'..INDENT..'Set your desired tp threshold',
+        INDENT:rep(2)..'- the tp at which your weapon skill will be used.  Default is 1000',
+        INDENT..'//aws start:'..INDENT..'Once the above settings are in, start AutoWS',
+        INDENT..'//aws stop:'..INDENT..'Stop AutoWS',
+        INDENT..'//aws settings:'..INDENT..'Display your current settings'
     }
-	
-	windower.add_to_chat(CONST_TITLE_COLOR, '.' .. CONST_NEWLINE)
-	windower.add_to_chat(CONST_TITLE_COLOR, '=========== AutoWS Help =================================' .. CONST_NEWLINE)
-	windower.add_to_chat(CONST_TITLE_COLOR, 'Valid Commands:' .. CONST_NEWLINE)
-	for key, value in pairs(instruction_lines) do
-		windower.add_to_chat(CONST_COMMAND_COLOR, tostring(key))
-		windower.add_to_chat(CONST_TEXT_COLOR, '-- ' .. tostring(value) .. CONST_NEWLINE)
-    end
-	windower.add_to_chat(CONST_HELPER_COLOR, "If you want to change a setting, you must stop AutoWS first with '//aws stop'.")
-	windower.add_to_chat(CONST_TITLE_COLOR, '=========================================================' .. CONST_NEWLINE)
-	windower.add_to_chat(CONST_TITLE_COLOR, '.' .. CONST_NEWLINE)
+    notice(table.concat(help_lines,'\n'))
 end
 
 function handle_skill(skill_name)
-    if run then 
-        return "Cannot change weapon skill while AutoWS is running.  Stop it first by typing '//aws stop'."
-    end
-
     local new_weapon_skill = all_weapon_skills[string.lower(skill_name)]
 
     if new_weapon_skill == nil then
@@ -89,10 +64,6 @@ function handle_skill(skill_name)
 end
 
 function handle_threshold(threshold)
-    if run then 
-        return "Cannot change tp threshold while AutoWS is running.  Stop it first by typing '//aws stop'."
-    end
-
     local new_threshold = tonumber(threshold)
 
     if not new_threshold or new_threshold < 1000 or new_threshold > 3000 or not new_threshold == math.floor(new_threshold) then
@@ -103,25 +74,10 @@ function handle_threshold(threshold)
     notice('tp threshold set to ' .. tostring(new_threshold))
 end
 
-function handle_count(clear)
-	if string.lower(clear) == 'clear' then
-		weapon_skill_useage_count = 0
-		notice('weapon skill usage count reset to 0')
-	else
-		notice('this is not a valid command.  the only valid command for the \"count\" setting is \"clear\"')
-	end
-end
-
-function handle_execute(onOrOff) 
-    execute =  string.lower(onOrOff) == 'on'
-    notice('execute set to ' .. tostring(execute))
-end
-
 function handle_settings()
     local settings = {
         ['weapon skill'] = weapon_skill.name or 'no weapon skill set',
         ['tp threshold'] = tostring(tp_threshold),
-        ['execute'] = tostring(execute),
         ['started'] = run
     }
     for key, value in pairs(settings) do
@@ -138,7 +94,7 @@ function handle_start()
         return "AutoWS is already running.  Type '//aws stop' to stop."
     end
 
-    notice('Beginning AutoWS.  Will check for target and TP every ' .. CONST_DELAY .. ' seconds.')
+    notice('Beginning AutoWS.')
     notice("You may type '//aws stop' to stop.")
 
     run = true
@@ -157,39 +113,17 @@ end
 --------------------------
 --  Engine Functions    --
 --------------------------
-function engine()
+function do_ws()
     local player = windower.ffxi.get_player()
 
     local is_player_in_combat = player.status == 1
     local player_has_tp = player.vitals.tp >= tp_threshold
     local is_weapon_skill_valid = weapon_skill.name ~= nil
 
-    if run and is_player_in_combat and player_has_tp and is_weapon_skill_valid then
+    if  run and is_player_in_combat and player_has_tp and is_weapon_skill_valid then
         target = windower.ffxi.get_mob_by_target('t')
-
-        local target_pre_ws_hpp = target.hpp
-        if ((execute == true) and (last_weapon_skill_damage > 0) and (target_pre_ws_hpp - last_weapon_skill_damage < 0)) or (execute == false) then
-            windower.chat.input('/ws "' .. weapon_skill.name .. '" <t>')
-			--weapon_skill_useage_count = weapon_skill_useage_count + 1
-			--notice('count → ' .. tostring(weapon_skill_useage_count))
-        end
-
-        local target_post_ws_hpp = target.hpp
-
-        if target_pre_ws_hpp ~= target_post_ws_hpp then
-            last_weapon_skill_damage = target_pre_ws_hpp - target_post_ws_hpp
-        end
-
-        if (execute == true) then
-            notice('last weapon skill damage logged at: ' .. tostring(last_weapon_skill_damage) .. '%')
-        end
+        windower.chat.input('/ws "' .. weapon_skill.name .. '" <t>')
     end
-
-    reschedule_engine()
-end
-
-function reschedule_engine()
-    engine:schedule(CONST_DELAY) -- schedule recursion
 end
 
 --------------------------
@@ -208,11 +142,9 @@ handlers = {
     ['help'] = handle_help,
     ['h'] = handle_help,
     ['ws'] = handle_skill,
-    ['skill'] = handle_skill,
+    ['weaponskill'] = handle_skill,
     ['threshold'] = handle_threshold,
     ['tp'] = handle_threshold,
-	['count'] = handle_count,
-    ['execute'] = handle_execute,
     ['settings'] = handle_settings,
     ['start'] = handle_start,
     ['stop'] = handle_stop
@@ -235,3 +167,4 @@ end
 --------------------------
 windower.register_event('load', load_all_weapon_skills)
 windower.register_event('addon command', handle_command)
+windower.register_event('tp change', do_ws)

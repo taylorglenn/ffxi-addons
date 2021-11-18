@@ -45,7 +45,7 @@ is_hidden = false
 --  Command Handler Functions   --
 ----------------------------------
 function handle_help()
-  local INDENT = '   '
+  local INDENT = ' ':rep(3)
   local help_lines = 
   {
     '-- ShoppingList (a simple addon by BlueGlenn) --',
@@ -122,13 +122,7 @@ function draw_box()
   local inventory = windower.ffxi.get_items().inventory
 
   for _, watched_item in pairs(watched_items) do
-    local inv_item = get_item_in_inventory(watched_item.id)
-    local item_count = 0
-
-    if inv_item ~= nil then 
-      item_count = inv_item.count
-    end
-
+    local item_count = get_item_in_inventory_quantity(watched_item.id)
     local list_item = 
     { 
       name = get_item_name(watched_item.id), 
@@ -145,13 +139,15 @@ end
 --------------------------
 --  Utility Functions   --
 --------------------------
-function get_item_in_inventory(item_id)
+function get_item_in_inventory_quantity(item_id)
+  local quantity = 0
   for _,item in pairs(windower.ffxi.get_items().inventory) do
     if type(item) == 'table' and item.id ~= nil and item.id == item_id then
-      return item
+      quantity = quantity + item.count
     end
   end
-  return nil
+
+  return quantity
 end
 
 function get_item_index(table, item_id)

@@ -98,7 +98,6 @@ function handle_start()
     notice("You may type '//aws stop' to stop.")
 
     run = true
-    engine()
 end
 
 function handle_stop()

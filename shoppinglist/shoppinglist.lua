@@ -18,21 +18,21 @@ require('tables')
 require('logger')
 
 --------------------------
---  Constants           --
---------------------------
-COLORS_WATCHED  = '255,255,255' -- R,G,B
-COLORS_ACQUIRED = '0,255,0'
-
---------------------------
 --  System Objects      --
 --------------------------
 all_items = {}
 watched_items = T{}
 
 --------------------------
+--  Configure Settings  --
+--------------------------
+local defaults = T{}
+defaults.lists = T{}
+settings = config.load('data\\settings.xml', defaults)
+
+--------------------------
 --  Box Setup           --
 --------------------------
-settings = config.load('data\\settings.xml', default_settings)
 box = texts.new(settings.text_box_settings, settings)
 box:text('')
 
@@ -44,8 +44,62 @@ is_hidden = false
 ----------------------------------
 --  Command Handler Functions   --
 ----------------------------------
+function handle_save(list_name)
+  if list_name == '' then
+    return 'You must enter a list name to save the current list.  Example: //sl save "craftingList"'
+  end
+  if watched_items:empty() then
+    return 'Empty lists cannot be saved.'
+  end
+  if list_name:gsub( "%W", "" ) ~= list_name then
+    return 'You may not have spaces, punctuation, or special characters in your list name.'
+  end
+  local save_items = {}
+  for _,item in pairs(watched_items) do
+    table.insert(save_items,1,item.name)
+  end
+  settings.lists[list_name] = table.concat(save_items,',')
+  settings:save('all')
+
+  notice('Current list saved as '..list_name)
+end
+
+function handle_load(list_name)
+  if list_name == '' then
+    return 'You must enter a list name to load.  Example: //sl load "craftingList"'
+  end
+  if settings.lists[list_name] == nil then
+    return list_name..' is not the name of a saved list.'
+  end
+  local load_list = settings.lists[list_name]:split(',')
+  for _,item in ipairs(load_list) do
+    handle_add(item)
+  end
+  notice('Successfully loaded list: '..list_name)
+end
+
+function handle_delete(list_name)
+  if settings.lists[list_name] == nil then
+    return list_name..' is not the name of a saved list.'
+  end
+  settings.lists[list_name] = nil 
+  settings:save('all')
+
+  notice('Deleted list: '..list_name)
+end
+
+function handle_print()
+  if settings.lists:empty() then
+    return 'There are no saved lists.'
+  end
+  notice('Saved Lists:')
+  for list_name,list_contents in pairs(settings.lists) do
+    notice(list_name..': '..list_contents)
+  end
+end
+
 function handle_help()
-  local INDENT = '   '
+  local INDENT = ' ':rep(3)
   local help_lines = 
   {
     '-- ShoppingList (a simple addon by BlueGlenn) --',
@@ -57,7 +111,12 @@ function handle_help()
     INDENT:rep(2)..'- item must already be in shopping list.',
     INDENT..'//sl clear:'..INDENT..'removes all items from shopping list.',
     INDENT..'//sl hide:'..INDENT..'hides shopping list even if there are items on it.',
-    INDENT..'//sl show:'..INDENT..'shows shopping list unless there are no items on it.'
+    INDENT..'//sl show:'..INDENT..'shows shopping list unless there are no items on it.',
+    INDENT..'//sl save <list_name>:'..INDENT..'saves current list under <list_name>.',
+    INDENT:rep(2)..'- You may not have spaces, punctuation, or special characters in your list name.',
+    INDENT..'//sl load <list_name>:'..INDENT..'loads current saved list with name <list_name>.',
+    INDENT..'//sl delete <list_name>:'..INDENT..'deletes current saved list with <list_name>.',
+    INDENT..'//sl lists:'..INDENT..'shows all saved lists.'
   }
   notice(table.concat(help_lines,'\n'))
 end
@@ -70,7 +129,6 @@ function handle_add(item_name)
   local item = {}
   item.id = all_items[item_name:lower()].id
   item.name = item_name
-  item.color = COLORS_WATCHED
   item.have = false
 
   if is_item_in_table(watched_items, item.id) then
@@ -122,13 +180,7 @@ function draw_box()
   local inventory = windower.ffxi.get_items().inventory
 
   for _, watched_item in pairs(watched_items) do
-    local inv_item = get_item_in_inventory(watched_item.id)
-    local item_count = 0
-
-    if inv_item ~= nil then 
-      item_count = inv_item.count
-    end
-
+    local item_count = get_item_in_inventory_quantity(watched_item.id)
     local list_item = 
     { 
       name = get_item_name(watched_item.id), 
@@ -145,13 +197,15 @@ end
 --------------------------
 --  Utility Functions   --
 --------------------------
-function get_item_in_inventory(item_id)
+function get_item_in_inventory_quantity(item_id)
+  local quantity = 0
   for _,item in pairs(windower.ffxi.get_items().inventory) do
     if type(item) == 'table' and item.id ~= nil and item.id == item_id then
-      return item
+      quantity = quantity + item.count
     end
   end
-  return nil
+
+  return quantity
 end
 
 function get_item_index(table, item_id)
@@ -193,6 +247,10 @@ handlers = {
     ['clear'] = handle_clear,
     ['show'] = handle_show,
     ['hide'] = handle_hide,
+    ['save'] = handle_save,
+    ['load'] = handle_load,
+    ['delete'] = handle_delete,
+    ['lists'] = handle_print
 }
 
 function handle_command(cmd, ...)

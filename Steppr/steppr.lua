@@ -11,7 +11,6 @@ _addon.commands = { 'steppr', 'st' }
 --  These should be saved in addons/libs  --
 --------------------------------------------
 config = require('config')
-packets = require('packets')
 res = require('resources')
 texts = require('texts')
 require('tables')
@@ -205,6 +204,18 @@ function target_change(index)
   reset()
 end
 
+function check_ws_hit(act)
+  if act.category == 3 then -- category 03 is weapon skill used
+    for _,target in pairs(act.targets) do
+      for _,action in pairs(target.actions) do
+        if not is_action_hit(action.message) then
+          reset()
+        end
+      end
+    end
+  end
+end
+
 --------------------------
 --  Utility Functions   --
 --------------------------
@@ -290,18 +301,6 @@ function get_ws_index(ws_name)
     end
   end
   return -1
-end
-
-function check_ws_hit(act)
-  if act.category == 3 then -- category 03 is weapon skill used
-    for _,target in pairs(act.targets) do
-      for _,action in pairs(target.actions) do
-        if not is_action_hit(action.message) then
-          reset()
-        end
-      end
-    end
-  end
 end
 
 function is_action_hit(action)

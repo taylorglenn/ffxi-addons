@@ -25,6 +25,7 @@ require('coroutine')
 COMBAT_STATUS = 1
 TP_THRESHOLD = 1000
 DELAY = 3
+MAX_TIME_BETWEEN_WS = 10
 
 --------------------------
 --  System Objects      --
@@ -34,6 +35,7 @@ ws_queue = Q{}
 ws_queue_index = 1
 stop = true
 busy = false
+last_run = os.time()
 
 --------------------------
 --  Configure Settings  --
@@ -209,8 +211,13 @@ end
 function do_ws(once)
   once = once or false
   if busy or stop then return end
+  
+  local time_since_last_run = os.time() - last_run
+  if time_since_last_run >= MAX_TIME_BETWEEN_WS then 
+    reset()
+  end
 
-  local player = windower.ffxi.get_player()
+  local player = windower.ffxi.get_player() 
   local next_weapon_skill = ws_queue[ws_queue_index]
 
   if can_player_ws() then
@@ -218,6 +225,7 @@ function do_ws(once)
     target = windower.ffxi.get_mob_by_target('t')
     notice('Using '..next_weapon_skill..' with '..tostring(player.vitals.tp)..' TP.')
     windower.chat.input('/ws "' .. next_weapon_skill .. '" <t>')
+    last_run = os.time()
 
     -- eject if last ws in queue or just need to run once
     if ws_queue_index >= ws_queue:length() or once then
@@ -225,10 +233,32 @@ function do_ws(once)
       return
     end
 
+    -- get ready for next run
     coroutine.sleep(DELAY) -- 3 second lockout before you can skillchain
     ws_queue_index = ws_queue_index + 1
     busy = false
   end
+end
+
+function is_player_debuffed()
+  local player_buffs = windower.ffxi.get_player().buffs
+  local debuffs = -- ~/FFXI_Windower/res/buffs.lua
+  {
+    [0] = 'ko',
+    [2] = 'sleep',
+    [7] = 'petrification',
+    [10] = 'stun',
+    [14] = 'charm',
+    [16] = 'amnesia',
+    [17] = 'charm', -- this is not a typo, charm is in res twice
+    [19] = 'sleep', -- same with sleep
+    [22] = 'intimidate',
+    [28] = 'terror'
+  }
+  for k,_ in pairs(debuffs) do
+    if S(player_buffs):contains(k) then return true end
+  end
+  return false
 end
 
 function can_player_ws()
@@ -238,6 +268,7 @@ function can_player_ws()
     not busy and
     player.status == COMBAT_STATUS and
     player.vitals.tp >= TP_THRESHOLD and
+    not is_player_debuffed() and
     ws_queue[ws_queue_index] ~= nil
 end
 
@@ -259,6 +290,46 @@ function get_ws_index(ws_name)
     end
   end
   return -1
+end
+
+function check_ws_hit(act)
+  if act.category == 3 then -- category 03 is weapon skill used
+    for _,target in pairs(act.targets) do
+      for _,action in pairs(target.actions) do
+        if not is_action_hit(action.message) then
+          reset()
+        end
+      end
+    end
+  end
+end
+
+function is_action_hit(action)
+  -- 0 damage doesn't get us anywhere
+  local damage_dealt = action.param
+  if damage_dealt < 1 then return false end
+
+  -- parse for bad messages
+  local bad_messages = -- https://github.com/Windower/Lua/wiki/Message-IDs
+  {
+    [4] = '<target> is out of range.',
+    [5] = 'Unable to see <target>.',
+    [15] = '<actor> misses <target>.',
+    [29] = '<actor> is paralyzed.',
+    [32] = '<target> dodges the attack.',
+    [84] = '<actor> is paralyzed.',
+    [89] = 'Unable to use weapon skill.',
+    [90] = 'Unable to use weapon skill.',
+    [94] = 'You must wait longer to perform that action.',
+    [188] = '<actor> uses <weapon_skill>, but misses <target>.',
+    [231] = '<actor> uses <weapon_skill>. <number> of <target>\'s effects disappears!',
+    [405] = '<actor> uses <weapon_skill>. <number> of <target>\'s effects disappears!'
+  }
+  local message = action.message
+  for k,_ in pairs(bad_messages) do
+    if k = action.message then return false end
+  end
+  return true
 end
 
 --------------------------
@@ -299,3 +370,4 @@ windower.register_event('load', load)
 windower.register_event('tp change', tp_change)
 windower.register_event('status change', status_change)
 windower.register_event('target change', target_change)
+windower.register_event('action', check_ws_hit)

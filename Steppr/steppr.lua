@@ -346,7 +346,9 @@ function did_pt_member_ws(action)
 
   for index,_ in pairs(key_indices) do
     local member = party[index]
-    member_ids:add(member.mob.id)
+    if member ~= nil then
+      member_ids:add(member.mob.id)
+    end
   end
 
   return member_ids:contains(action.actor_id)

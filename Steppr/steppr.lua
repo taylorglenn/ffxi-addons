@@ -13,6 +13,7 @@ _addon.commands = { 'steppr', 'st' }
 config = require('config')
 res = require('resources')
 texts = require('texts')
+require('sets')
 require('tables')
 require('logger')
 require('queues')
@@ -205,12 +206,20 @@ function target_change(index)
 end
 
 function check_ws_hit(act)
-  if type(act) == 'table' and act.actor_id ~= nil and act.actor_id == windower.ffxi.get_player().id then
-    if act.category == 3 then -- category 03 is weapon skill used
+  -- act.category == 3 is weapon skill used
+  if type(act) == 'table' and act.category ~= nil and act.category == 3 and act.actor_id ~= nil then
+    -- if party member weapon skilled we're gonna have to assume it broke the skillchain.
+    if did_pt_member_ws(act) then 
+      reset()
+      return
+    end
+    -- if player weapon skilled, we gotta see if it hit
+    if act.actor_id == windower.ffxi.get_player().id then
       for _,target in pairs(act.targets) do
         for _,action in pairs(target.actions) do
           if type(action) == table and action.message ~= nil and not is_action_hit(action.message) then
             reset()
+            return
           end
         end
       end
@@ -328,6 +337,19 @@ function is_action_hit(action)
     if k == action.message then return false end
   end
   return true
+end
+
+function did_pt_member_ws(action)
+  local party = windower.ffxi.get_party()
+  local key_indices = S{ 'p1', 'p2', 'p3', 'p4', 'p5' } -- p0 is the player, whom we do not care about here
+  local member_ids = S{}
+
+  for index,_ in pairs(key_indices) do
+    local member = party[index]
+    member_ids:add(member.mob.id)
+  end
+
+  return member_ids:contains(action.actor_id)
 end
 
 --------------------------

@@ -226,7 +226,8 @@ function do_ws(once)
   if busy or stop then return end
   
   local time_since_last_run = os.time() - last_run
-  if time_since_last_run >= MAX_TIME_BETWEEN_WS then 
+  local step_time_period = MAX_TIME_BETWEEN_WS - ws_queue_index + 1 -- we lose one second for each step after the first
+  if time_since_last_run >= step_time_period then  
     reset()
   end
 

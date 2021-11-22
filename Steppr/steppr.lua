@@ -76,9 +76,9 @@ function handle_load(list_name)
   end
   local load_list = settings.lists[list_name]:split(',')
   for _,item in ipairs(load_list) do
-    handle_add(item)
+    ws_queue:push(item)
   end
-  notice('Successfully loaded list: '..list_name)
+  handle_print_queue()
 end
 
 function handle_delete(list_name)

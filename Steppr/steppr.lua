@@ -326,7 +326,7 @@ function is_action_hit(action)
   }
   local message = action.message
   for k,_ in pairs(bad_messages) do
-    if k = action.message then return false end
+    if k == action.message then return false end
   end
   return true
 end

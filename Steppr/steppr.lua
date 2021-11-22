@@ -205,11 +205,13 @@ function target_change(index)
 end
 
 function check_ws_hit(act)
-  if act.category == 3 then -- category 03 is weapon skill used
-    for _,target in pairs(act.targets) do
-      for _,action in pairs(target.actions) do
-        if not is_action_hit(action.message) then
-          reset()
+  if type(act) == 'table' and act.actor_id ~= nil and act.actor_id == windower.ffxi.get_player().id then
+    if act.category == 3 then -- category 03 is weapon skill used
+      for _,target in pairs(act.targets) do
+        for _,action in pairs(target.actions) do
+          if type(action) == table and action.message ~= nil and not is_action_hit(action.message) then
+            reset()
+          end
         end
       end
     end
@@ -304,10 +306,6 @@ function get_ws_index(ws_name)
 end
 
 function is_action_hit(action)
-  -- 0 damage doesn't get us anywhere
-  local damage_dealt = action.param
-  if damage_dealt < 1 then return false end
-
   -- parse for bad messages
   local bad_messages = -- https://github.com/Windower/Lua/wiki/Message-IDs
   {

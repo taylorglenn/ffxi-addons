@@ -205,6 +205,16 @@ function target_change(index)
   reset()
 end
 
+function on_action(act)
+  jiggle_ws()
+  check_ws_hit(act)
+end
+
+function jiggle_ws()
+  local player = windower.ffxi.get_player()
+  if player.vitals.tp == 3000 then do_ws() end
+end
+
 function check_ws_hit(act)
   -- act.category == 3 is weapon skill used
   if type(act) == 'table' and act.category ~= nil and act.category == 3 and act.actor_id ~= nil then
@@ -346,7 +356,9 @@ function did_pt_member_ws(action)
 
   for index,_ in pairs(key_indices) do
     local member = party[index]
-    member_ids:add(member.mob.id)
+    if member ~= nil and member.mob ~= nil and member.mob.id ~= nil then
+      member_ids:add(member.mob.id)
+    end
   end
 
   return member_ids:contains(action.actor_id)
@@ -390,4 +402,4 @@ windower.register_event('load', load)
 windower.register_event('tp change', tp_change)
 windower.register_event('status change', status_change)
 windower.register_event('target change', target_change)
-windower.register_event('action', check_ws_hit)
+windower.register_event('action', on_action)

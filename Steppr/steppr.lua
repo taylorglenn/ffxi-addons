@@ -183,6 +183,12 @@ function handle_stop()
   reset()
 end
 
+function job_change()
+  reset()
+  handle_stop()
+  handle_clear()
+end
+
 --------------------------
 --  Event functions     --
 --------------------------
@@ -403,3 +409,4 @@ windower.register_event('tp change', tp_change)
 windower.register_event('status change', status_change)
 windower.register_event('target change', target_change)
 windower.register_event('action', on_action)
+windower.register_event('job_change', job_change)

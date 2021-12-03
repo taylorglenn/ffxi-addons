@@ -58,11 +58,8 @@ function handle_save(list_name)
   if list_name:gsub( "%W", "" ) ~= list_name then
     return 'You may not have spaces, punctuation, or special characters in your list name.'
   end
-  local save_items = {}
-  for _,item in pairs(ws_queue.data) do
-    table.insert(save_items,1,item)
-  end
-  settings.lists[list_name] = table.concat(save_items,',')
+  
+  settings.lists[list_name] = table.concat(ws_queue.data,',')
   settings:save('all')
 
   notice('Current list saved as '..list_name)

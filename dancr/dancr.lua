@@ -45,6 +45,7 @@ box:text('')
 -------------------------- 
 is_hidden = false
 flourish_guide = true
+verbose = false
 
 ----------------------------------
 --  Command Handler Functions   --
@@ -57,6 +58,7 @@ function handle_help()
     'Commands:',
     INDENT..'//dnc show:'..INDENT..'shows the addon',
     INDENT..'//dnc hide:'..INDENT..'hides the addon',
+    INDENT..'//dnc verbose:'..INDENT..'shows or hides the flourish descriptions',
   }
   notice(table.concat(help_lines,'\n'))
 end
@@ -69,9 +71,12 @@ function handle_hide()
   is_hidden = true
 end
 
+function handle_verbose()
+  verbose = not verbose
+end
+
 function handle_guide()
   flourish_guide = not flourish_guide
-  draw_box()
 end
 
 ------------------------------
@@ -102,8 +107,13 @@ function draw_box()
 
     -- Display Flourish Guide
     if flourish_guide then
-      for name,_ in pairs(fl_obj.flourishes) do
-        box_lines:append(INDENT..name)
+      for _,flourish in pairs(fl_obj.flourishes) do
+        local line = (
+          verbose and '['..flourish.fms..'] '..flourish.name..' ('..flourish.help..')'
+          or
+          not verbose and flourish.name)
+
+        box_lines:append(INDENT..line)
       end
     end
 
@@ -191,10 +201,10 @@ function load_flourishes()
       recast = f1_recast,
       color = ter(f1_recast > 0, colors.red, colors.white),
       flourishes = 
-      S{
-        'Animated Flourish',
-        'Desperate Flourish',
-        'Violent Flourish'
+      T{
+        {name='Animated Flourish', fms='1~2', help='Provoke'},
+        {name='Desperate Flourish', fms='1', help='Gravity'},
+        {name='Violent Flourish', fms='1', help='Stun'}
       }
     },
     [2] =
@@ -203,10 +213,10 @@ function load_flourishes()
       recast = f2_recast,
       color = ter(f2_recast > 0, colors.red, colors.white),
       flourishes = 
-      S{
-        'Reverse Flourish',
-        'Building Flourish',
-        'Wild Flourish'
+      T{
+        {name='Reverse Flourish', fms='1~5', help='Gain TP'},
+        {name='Building Flourish', fms='1~3', help='Buff next WS'},
+        {name='Wild Flourish', fms='2', help='Ready Skillchain'}
       }
     },
     [3] =
@@ -215,10 +225,10 @@ function load_flourishes()
       recast = f3_recast,
       color = ter(f3_recast > 0, colors.red, colors.white),
       flourishes = 
-      S{
-        'Climactic Flourish',
-        'Striking Flourish',
-        'Ternnary Flourish'
+      T{
+        {name='Climactic Flourish', fms='1~5', help='Force crit(s)'},
+        {name='Striking Flourish', fms='2', help='Force DA'},
+        {name='Ternary Flourish', fms='3', help='Force TA'}
       }
     }
   }
@@ -232,7 +242,8 @@ handlers = {
     ['h'] = handle_help,
     ['show'] = handle_show,
     ['hide'] = handle_hide,
-    ['guide'] = handle_guide
+    ['guide'] = handle_guide,
+    ['verbose'] = handle_verbose
 }
 
 function handle_command(cmd, ...)

@@ -350,7 +350,6 @@ function is_action_hit(action)
     [231] = '<actor> uses <weapon_skill>. <number> of <target>\'s effects disappears!',
     [405] = '<actor> uses <weapon_skill>. <number> of <target>\'s effects disappears!'
   }
-  local message = action.message
   for k,_ in pairs(bad_messages) do
     if k == action.message then return false end
   end

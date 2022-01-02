@@ -12,3 +12,4 @@
 #### Commands: ####
 1. show - Shows the addon.
 2. hide - Hides the addon.
+3. verbose - Toggle to hide or show more verbosity around the flourish descriptions.

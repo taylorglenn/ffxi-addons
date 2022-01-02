@@ -7,7 +7,6 @@
 * A Final Fantasy XI Dancer Cheatsheet
 
 #### Command Prefix: ####
-//dancr
 //dnc
 
 #### Commands: ####

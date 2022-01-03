@@ -26,6 +26,7 @@ COMBAT_STATUS = 1
 TP_THRESHOLD = 1000
 DELAY = 3
 MAX_TIME_BETWEEN_WS = 10
+MIN_TIME_BETWEEN_WS = 3
 
 --------------------------
 --  System Objects      --
@@ -253,8 +254,8 @@ function do_ws(once)
   if busy or stop then return end
   
   local time_since_last_run = os.time() - last_run
-  local step_time_period = MAX_TIME_BETWEEN_WS - ws_queue_index + 2 -- we lose one second for each step after the first
-  if time_since_last_run >= step_time_period then  
+  local step_time_period = get_step_time(ws_queue_index - 1) -- the queue is 1 based, but we need to start with zero
+  if time_since_last_run > step_time_period then  
     reset()
   end
 
@@ -279,6 +280,16 @@ function do_ws(once)
     ws_queue_index = ws_queue_index + 1
     busy = false
   end
+end
+
+function get_step_time(step)
+  -- we lose a second for each step after the first
+  local time = MAX_TIME_BETWEEN_WS - step
+  return ter(time < MIN_TIME_BETWEEN_WS, MIN_TIME_BETWEEN_WS, time)
+end
+
+function ter(cond, t, f)
+  if cond then return t else return f end
 end
 
 function is_player_debuffed()

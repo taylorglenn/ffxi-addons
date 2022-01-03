@@ -44,7 +44,6 @@ box:text('')
 --  Global Flags        --
 -------------------------- 
 is_hidden = false
-flourish_guide = true
 verbose = false
 
 ----------------------------------
@@ -75,10 +74,6 @@ function handle_verbose()
   verbose = not verbose
 end
 
-function handle_guide()
-  flourish_guide = not flourish_guide
-end
-
 ------------------------------
 --  Box Drawing Functions   --
 ------------------------------
@@ -106,15 +101,13 @@ function draw_box()
     box_lines:append(fl_obj.color..fl_obj.name..': '..fl_obj.recast)
 
     -- Display Flourish Guide
-    if flourish_guide then
-      for _,flourish in pairs(fl_obj.flourishes) do
-        local line = (
-          verbose and '['..flourish.fms..'] '..flourish.name..' ('..flourish.help..')'
-          or
-          not verbose and flourish.name)
+    for _,flourish in pairs(fl_obj.flourishes) do
+      local line = (
+        verbose and '['..flourish.fms..'] '..flourish.name..' ('..flourish.help..')'
+        or
+        not verbose and flourish.name)
 
-        box_lines:append(INDENT..line)
-      end
+      box_lines:append(INDENT..line)
     end
 
     box_lines:append('\\cr')
@@ -243,7 +236,6 @@ handlers = {
     ['h'] = handle_help,
     ['show'] = handle_show,
     ['hide'] = handle_hide,
-    ['guide'] = handle_guide,
     ['verbose'] = handle_verbose
 }
 

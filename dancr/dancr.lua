@@ -25,7 +25,7 @@ colors =
   ['white'] = '\\cs(255,255,255) ',
   ['red'] = '\\cs(255,0,0) ',
   ['green'] = '\\cs(0,255,0) ',
-  ['yellow'] = '\\cs(128,128,0) ',
+  ['yellow'] = '\\cs(255,255,0) ',
 }
 
 --------------------------
@@ -145,7 +145,8 @@ function get_finishing_moves()
     [2] = 382,
     [3] = 383,
     [4] = 384,
-    [5] = 385
+    [5] = 385,
+    [6] = 588 -- this is actually 6 plus, but it needs to be an integer to be used in logic elsewhere
   }
 
   for k,v in pairs(finishing_move_ids) do
@@ -159,7 +160,7 @@ function get_fm_obj()
   local m = get_finishing_moves()
   return 
   {
-    moves = m,
+    moves = ter(m == 6, '6+', tostring(m)),
     color = 
       ter(
         m > 0, 

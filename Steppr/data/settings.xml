@@ -1,6 +1,11 @@
 <?xml version="1.1" ?>
 <settings>
     <global>
-
+        <lists>
+            <mnk3step>Asuran Fists,Raging Fists,Victory Smite</mnk3step>
+            <mnk4step>Asuran Fists,Raging Fists,Victory Smite,Victory Smite</mnk4step>
+            <sam4step>Tachi: Fudo,Tachi: Kasha,Tachi: Shoha,Tachi: Fudo</sam4step>
+            <thf>Shark Bite,Rudra&apos;s Storm,Evisceration,Rudra&apos;s Storm</thf>
+        </lists>
     </global>
 </settings>

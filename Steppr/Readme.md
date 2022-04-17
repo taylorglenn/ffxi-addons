@@ -21,6 +21,8 @@ Auto-Executes weapon skills based on a queue
 //st queue: Prints entire queue for you to see
 
 # Control Commands
+//st aftermath: Sets the level of aftermath buff you want to maintain - 1, 2, or 3.  Setting to 0 will allow the addon to use weaponskills freely and not consider aftermath.
+
 //st start: Starts Steppr
 
 //st stop: Stop Steppr

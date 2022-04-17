@@ -34,6 +34,7 @@ MIN_TIME_BETWEEN_WS = 3
 all_weapon_skills = {}
 ws_queue = Q{}
 ws_queue_index = 1
+aftermath = 0
 stop = true
 busy = false
 last_run = os.time()
@@ -170,6 +171,15 @@ function handle_print_queue()
   for k,v in pairs(ws_queue.data) do
     notice(tostring(k).." → "..tostring(v))
   end
+end
+
+function handle_aftermath(level) 
+  level = tonumber(level)
+  if level < 0 then level = 0 end
+  if level > 3 then level = 3 end
+  aftermath = level
+  notice('aftermath set to level '..level..'.')
+  notice('Please keep in mind that this setting only works if the first WS of your chain is a WS that grants aftermath.')
 end
 
 function handle_start() 
@@ -321,7 +331,31 @@ function can_player_ws()
     player.status == COMBAT_STATUS and
     player.vitals.tp >= TP_THRESHOLD and
     not is_player_debuffed() and
-    ws_queue[ws_queue_index] ~= nil
+    ws_queue[ws_queue_index] ~= nil and 
+    not hold_tp()
+end
+
+function hold_tp()
+  if aftermath <= 0 or aftermath > 3 then return false end
+  
+  local am_table = { -- ~/FFXI_Windower/res/buffs.lua
+    [1] = { buff_id = 270, tp = 1000 },
+    [2] = { buff_id = 271, tp = 2000 },
+    [3] = { buff_id = 272, tp = 3000 }
+  }
+  local required_am = am_table[aftermath]
+  if required_am == nil then return false end
+
+  local player = windower.ffxi.get_player()
+
+  for _,v in pairs(player.buffs) do
+    if v == required_am.buff_id then return false end
+  end
+
+  local player_tp = player.vitals.tp
+  if player_tp >= required_am.tp then return false end
+
+  return true
 end
 
 function load_all_weapon_skills()
@@ -396,6 +430,7 @@ handlers = {
     ['delete'] = handle_delete,
     ['lists'] = handle_print_lists,
     ['queue'] = handle_print_queue,
+    ['aftermath'] = handle_aftermath,
     ['start'] = handle_start,
     ['stop'] = handle_stop
 }

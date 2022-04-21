@@ -5,6 +5,7 @@ function getReadyMoveData(moveArray)
   for _,v in ipairs(moveArray) do
     table.insert(out, ready_moves[v])
   end
+  table.sort(out, function(a, b) return a.index < b.index end)
   return out
 end
 

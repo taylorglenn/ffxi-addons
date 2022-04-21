@@ -69,6 +69,7 @@ function handleHelp()
     INDENT..'//bst show:'..INDENT..'shows the addon',
     INDENT..'//bst hide:'..INDENT..'hides the addon',
     INDENT..'//bst verbose:'..INDENT..'shows or hides the names of ready moves',
+    INDENT..'//bst ready <ready_move_index>:'..INDENT..'uses the ready move with the given index'
   }
   notice(table.concat(help_lines,'\n'))
 end
@@ -83,6 +84,15 @@ end
 
 function handleVerbose()
   verbose = not verbose
+end
+
+function handleReady(referenceNumber) 
+  referenceNumber = tonumber(referenceNumber)
+  if (not referenceNumber) then
+    return 'You must enter a whole number.'
+  end
+
+  return useReadyMove(referenceNumber)
 end
 
 ------------------------------
@@ -120,7 +130,7 @@ function drawBox()
   -- Pet Ready Moves
   for _,v in pairs(currentPet.ready) do
     local readyMoveColor = ter(v.cost > readyCharges, colors.red, colors.white)
-    boxLines:append(readyMoveColor..INDENT..'['..v.cost..'] '..v.name..'\\cr')
+    boxLines:append(readyMoveColor..INDENT..v.index..': ['..v.cost..'] '..v.name..'\\cr')
   end
   
   box:text(boxLines:concat('\n'))
@@ -131,7 +141,7 @@ end
 --  BST Specific Functions  --
 ------------------------------
 function isPlayerBst()
-  local player = ffxi.windower.get_player()
+  local player = windower.ffxi.get_player()
   return player.main_job == 'BST'
 end
 
@@ -177,6 +187,18 @@ function getPetFromTable(petName, hpp) -- hpp is optional
   return nil
 end
 
+function useReadyMove(refNum)
+  refNum = tonumber(refNum)
+
+  local pet = getCurrentPet()
+  if (pet == nil) then return 'No current pet active!' end
+
+  local totalReadyMoves = table.getn(pet.ready)
+  if (refNum == nil or refNum <= 0 or refNum > totalReadyMoves) then return 'Ready move index out of range' end
+
+  windower.send_command('input /bstpet '..refNum..' <me>')
+end
+
 --------------------------
 --  Utility Functions   --
 --------------------------
@@ -198,7 +220,8 @@ handlers = {
   ['h'] = handleHelp,
   ['show'] = handleShow,
   ['hide'] = handleHide,
-  ['verbose'] = handleVerbose
+  ['verbose'] = handleVerbose,
+  ['ready'] = handleReady
 }
 
 function handleCommand(cmd, ...)

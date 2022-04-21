@@ -119,7 +119,7 @@ function handle_help()
       INDENT..'//st clear:'..INDENT..'Clears entire weapon skill queue',
       INDENT..'//st queue:'..INDENT..'Prints entire queue for you to see',
       'Control Commmands:',
-      INDENT..'//st aftermath: Sets the level of aftermath buff you want to maintain - 1, 2, or 3.  Setting to 0 will allow the addon to use weaponskills freely and not consider aftermath'
+      INDENT..'//st aftermath: Sets the level of aftermath buff you want to maintain - 1, 2, or 3.  Setting to 0 will allow the addon to use weaponskills freely and not consider aftermath',
       INDENT..'//st start:'..INDENT..'Starts Steppr',
       INDENT..'//st stop:'..INDENT..'Stop Steppr',
       'Memory Commmands:',

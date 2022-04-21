@@ -166,21 +166,24 @@ function updatePetTp(id,original,modified,injected,blocked)
 end
 
 function getCurrentPet()
-  local pet = windower.ffxi.get_mob_by_target('pet')
+  local petFromWindower = windower.ffxi.get_mob_by_target('pet')
   -- we gotta check a few flags to make sure this doesn't id a luopan or Kyra's water spirit as our pet
-  if (pet ~= nil and pet.valid_target and pet.charmed) then
-    return getPetFromTable(pet.name, pet.hpp)
+  if (petFromWindower ~= nil and petFromWindower.valid_target and petFromWindower.charmed) then
+    local petFromTable = getPetFromTable(petFromWindower.name)
+    if (petFromTable ~= nil) then 
+      petFromTable.hpp = petFromWindower.hpp
+      return petFromTable
+    end
   end
   return nil
 end
 
-function getPetFromTable(petName, hpp) -- hpp is optional
+function getPetFromTable(petName)
   -- remove spaces from name if there are any
   local scrubbedName = string.gsub(petName, "%s+", "")
 
   local foundPet = petTable[scrubbedName]
   if (foundPet ~= nil) then
-    foundPet.hpp = hpp
     return foundPet
   end
 

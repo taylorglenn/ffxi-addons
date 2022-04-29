@@ -170,7 +170,7 @@ function get_nfr_obj()
   local nfr_recast = get_recast_time(223) -- no foot rise
   return 
   {
-    recast = math.floor(nfr_recast),
+    recast = math.ceil(nfr_recast),
     color = ter(nfr_recast > 0, colors.red, colors.green)
   }
 end
@@ -183,9 +183,9 @@ end
 
 function load_flourishes()
    -- these are recast_id from ~/res/job_abilities.lua
-   local f1_recast = get_recast_time(221)
-   local f2_recast = get_recast_time(222)
-   local f3_recast = get_recast_time(226)
+   local f1_recast = math.ceil(get_recast_time(221))
+   local f2_recast = math.ceil(get_recast_time(222))
+   local f3_recast = math.ceil(get_recast_time(226))
 
   return 
   {

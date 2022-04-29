@@ -78,7 +78,7 @@ end
 --  Box Drawing Functions   --
 ------------------------------
 function draw_box()
-  if is_hidden then
+  if is_hidden or not is_player_dnc() then
     box:hide()
     return
   end
@@ -122,6 +122,12 @@ end
 --------------------------
 function ter(cond, t, f)
   if cond then return t else return f end
+end
+
+function is_player_dnc()
+  local player = windower.ffxi.get_player()
+  if (player == nil) then return false end
+  return player.main_job == 'DNC'
 end
 
 function get_recast_time(recast_id)

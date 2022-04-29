@@ -170,7 +170,7 @@ function get_nfr_obj()
   local nfr_recast = get_recast_time(223) -- no foot rise
   return 
   {
-    recast = nfr_recast,
+    recast = math.floor(nfr_recast),
     color = ter(nfr_recast > 0, colors.red, colors.green)
   }
 end

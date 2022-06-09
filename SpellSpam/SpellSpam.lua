@@ -47,58 +47,49 @@ queue_index = 1
 --  Command Handler Functions   --
 ----------------------------------
 function handle_help()
-	local CONST_TITLE_COLOR = 16 -- pink
-	local CONST_COMMAND_COLOR = 222 -- cyan
-	local CONST_HELPER_COLOR = 220 -- blue
-	local CONST_TEXT_COLOR = 100 -- yellow
-	local CONST_NEWLINE = '\n'
-	
-    local instruction_lines = {
-		['//ss spell \"spell_name\"'] = "Set your desired spell (no default, you MUST set this, and it MUST be in quotes).",
-		['//ss target <me> or <t> or \"npc_name\"'] = "Set your desired target (default: <me>).",
-		['//ss autoheal'] = "Toggle whether you'd like to automatically heal when your MP runs out (default: false).",
-		['//ss food \"food name\"'] = "Set what food (if any) you'd like to consume.  New food will be consumed when the buff wears if there is any in your inventory.  You may clear your food choice with '//ss food clear'.",
-		['//ss start'] = "Once the above settings are in, start SpellSpam.",
-		['//ss stop'] = "Stop SpellSpam.",
-		['//ss settings'] = "Display your current settings.",
+    local INDENT = ' ':rep(3)
+    local D_INDENT = INDENT..INDENT
+    local help_lines = 
+    {
+      '-- SpellSpam (an addon by BlueGlenn) --',
+      'Commands:',
+      INDENT..'//ss spell <add/remove/clear> \"spell_name\":\n'..D_INDENT..'Set or remove your desired spell to/from the queue.',
+      INDENT..'/ss target <me> or <t> or \"npc/player_name\":\n'..D_INDENT..'Set your desired target (default: <me>).',
+      INDENT..'//ss autoheal:\n'..D_INDENT..'Toggle \\heal back to full when your MP runs out (default: false).',
+      INDENT..'/ss food \"food name\":\n'..D_INDENT..'Set what food (if any) you\'d like to consume. You may clear this with //ss food clear.',
+      INDENT..'//ss start:\n'..D_INDENT..'Start SpellSpam.  It\'ll run through each spell in the queue in order.',
+      INDENT..'//ss stop:\n'..D_INDENT..'Stop SpellSpam.',
+      INDENT..'//ss settings:\n'..D_INDENT..'Display your current settings.',
+      'Example:\n'..INDENT..'//ss add \"Shell\"\n'..INDENT..'//ss add \"Protect\"\n'..INDENT..'//ss autoheal\n'..INDENT..'//ss target <me>\n'..INDENT..'//ss start'
     }
-	
-	windower.add_to_chat(CONST_TITLE_COLOR, '.' .. CONST_NEWLINE)
-	windower.add_to_chat(CONST_TITLE_COLOR, '=========== SpellSpam Help =================================' .. CONST_NEWLINE)
-	windower.add_to_chat(CONST_TITLE_COLOR, 'Valid Commands:' .. CONST_NEWLINE)
-	for key, value in pairs(instruction_lines) do
-		windower.add_to_chat(CONST_COMMAND_COLOR, tostring(key))
-		windower.add_to_chat(CONST_TEXT_COLOR, '-- ' .. tostring(value) .. CONST_NEWLINE)
-    end
-	windower.add_to_chat(CONST_HELPER_COLOR, "If you want to change a setting, you must stop SpellSpam first with '//ss stop'.")
-	windower.add_to_chat(CONST_TITLE_COLOR, '=========================================================' .. CONST_NEWLINE)
-	windower.add_to_chat(CONST_TITLE_COLOR, '.' .. CONST_NEWLINE)
+    notice(table.concat(help_lines,'\n'))
 end
 
 function handle_autoheal(autoheal_selection)
-    if run then 
-        return "Cannot update autoheal while SpellSpam is running.  Stop it first by typing '//ss stop'."
-    end
-
     autoheal = not autoheal
     notice('autoheal set to ' .. tostring(autoheal) .. '.')
 end
 
 function handle_spell(add_remove_clear, spell_name)
-    if run then 
-        return "Cannot change spell while SpellSpam is running.  Stop it first by typing '//ss stop'."
-    end
+    local messages = {}
 
     if (add_remove_clear:lower() == 'add') then
-        add_spell(spell_name)
+        messages = table.append(messages, add_spell(spell_name))
     end
 
     if (add_remove_clear:lower() == 'remove') then
-        remove_spell(spell_name)
+        messages = table.append(messages, remove_spell(spell_name))
     end
 
     if (add_remove_clear:lower() == 'clear') then
-        clear_spell_queue()
+        messages = table.append(messages, clear_spell_queue())
+    end
+
+    if (#messages > 0) then
+        for _,message in pairs(messages) do
+            if (message ~= '') then error(message) end
+        end
+        return
     end
 
     print_spell_queue()
@@ -188,6 +179,7 @@ function handle_stop()
     end
 
     run = false
+    queue_index = 1
     notice('Stopping SpellSpam.')
 end
 
@@ -203,7 +195,6 @@ function status_idle(player)
         end
     elseif recasts[spell.id] == 0 then
         cast_spell()
-        increment_spell_queue_index()
     end
 end
 
@@ -252,7 +243,24 @@ function engine()
 end
 
 function reschedule_engine()
-    engine:schedule(spell.cast_time + CONST_DELAY) -- schedule recursion
+    -- get cooldown of NEXT spell.  wait until it is 0 to cast again.
+    local recasts = windower.ffxi.get_spell_recasts()
+    local next_queue_index = get_next_queue_index()
+
+    local current_spell = spell_queue['data'][queue_index]
+    local next_spell = spell_queue['data'][next_queue_index]
+
+    if (current_spell ~= nil and next_spell ~= nil) then
+        local next_recast = recasts[next_spell.recast_id]/60 -- not sure why, but the game values need to be divided by 60 get the the value in seconds
+        --windower.add_to_chat(123, 'Next spell recast id: '..next_spell.recast_id)
+        engine:schedule(current_spell.cast_time + next_recast + CONST_DELAY) -- schedule recursion
+        --windower.add_to_chat(123, tostring(current_spell.cast_time)..' + '..tostring(next_recast)..' + '..tostring(CONST_DELAY)..' = '..tostring(current_spell.cast_time + next_recast + CONST_DELAY))
+        increment_spell_queue_index() -- only increment the queue if the engine was properly rescheduled
+        return
+    end
+
+    error('Rescheduling error...')
+    handle_stop()
 end
 
 function use_food()
@@ -276,30 +284,42 @@ function cast_spell()
         handle_stop()
         return 
     end
+    
     windower.chat.input('/ma "' .. spell.name .. '" ' .. target)
 end
 
-function increment_spell_queue_index()
+function get_next_queue_index()
     local queue_length = spell_queue:length()
 
     if queue_length == 0 then 
-        handle_stop() 
-        return 
+        return 0
     end
 
-    if queue_index + 1 > queue_length then
-        queue_index = 1
+    local next_queue_index = queue_index + 1
+
+    if next_queue_index > queue_length then
+        return 1
+    end
+
+    return next_queue_index
+end
+
+function increment_spell_queue_index()
+    local next_queue_index = get_next_queue_index()
+
+    if (next_queue_index == 0) then
+        handle_stop()
         return
     end
 
-    queue_index = queue_index + 1 
+    queue_index = get_next_queue_index()
 end
 
 function print_spell_queue()
     if spell_queue:length() == 0 then return "Spell Queue is empty!" end
     notice('Spell Queue:')
     for k,v in pairs(spell_queue['data']) do 
-        notice(tostring(k).." → "..tostring(v))
+        notice(tostring(k).." → "..tostring(v.name))
     end
 end
 
@@ -316,7 +336,7 @@ function add_spell(spell_name)
     end
 
     spell = new_spell
-    spell_queue:push(spell_name)
+    spell_queue:push(spell)
     notice("Spell added to queue → " .. spell_name)
 end
 
@@ -341,13 +361,28 @@ end
 
 function load_all_spells()
     for k,v in pairs(res.spells) do
-        all_spells[string.lower(v.english)] = {id = k, targets = v.targets, cast_time = v.cast_time, name = v.english, mp_cost = v.mp_cost}
+        all_spells[string.lower(v.english)] = {
+            id = k, 
+            targets = v.targets, 
+            recast_id = v.recast_id, 
+            cast_time = v.cast_time, 
+            name = v.english,
+            mp_cost = v.mp_cost
+        }
     end
+    --for k,v in pairs(all_spells) do 
+    --    windower.add_to_chat(123, 'k: '..tostring(k)..', v: '..tostring(v.recast_id))
+    --end
 end
 
 function load_all_items()
     for k,v in pairs(res.items) do
-        all_items[string.lower(v.english)] = {id = k, targets = v.targets, cast = v.cast_time, name = v.english}
+        all_items[string.lower(v.english)] = {
+            id = k, 
+            targets = v.targets, 
+            cast = v.cast_time, 
+            name = v.english
+        }
     end
 end
 

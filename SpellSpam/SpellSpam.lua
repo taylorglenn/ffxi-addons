@@ -356,6 +356,7 @@ end
 
 function clear_spell_queue()
     spell_queue:clear()
+    queue_index = 1
     notice("Cleared spell queue!")
 end
 

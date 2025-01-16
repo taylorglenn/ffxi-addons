@@ -5,7 +5,6 @@ function get_sets()
   -- Load and initialize the include file.
   mote_include_version = 2
   include('Mote-Include.lua')
-  include('organizer-lib')
 end
 
 ---------------------------------
@@ -29,20 +28,32 @@ end
 set_macros(1, 1)
 
 ---------------------------------
--- dressup 
+-- dislpay globals
 ---------------------------------
-function dressup(race, gender, face)
-  send_command('@input //lua l dressup')
-  if not race or not gender or not face then send_command('@input //du clear self') return end
-  send_command('@input //du self race ' .. race .. ' ' .. gender)
-  send_command('@wait 2; input //du self face ' .. tostring(face))
-end
-dressup()
-
----------------------------------
--- organizer 
----------------------------------
-send_command('@input //gs org;wait6; input //gs validate')
+displaySettings = 
+{ 
+  pos = 
+  {
+    x = 0,
+    y = 0
+    --x = 810,
+    --y = 1065
+  },
+  text = 
+  {
+    font = 'Consolas',
+    size = 10
+  },
+  bg = 
+  {
+    alpha = 255
+  },
+  flags = 
+  {
+    draggable = false
+  }
+}
+displayBox = texts.new('${value}', displaySettings)
 
 ---------------------------------
 -- job setup
@@ -63,13 +74,15 @@ function user_setup()
   state.IdleMode:options('Normal')
   send_command('bind ^i gs c cycle IdleMode')
 
-  state.OffenseMode:options('Normal', 'Acc', 'Counter', 'SubtleBlow')
+  state.OffenseMode:options('Normal', 'Accuracy', 'Glass Cannon', 'Counter', 'Subtle Blow')
   send_command('bind ^o gs c cycle OffenseMode')
+
+  drawDisplay()
 
   ---------------------------------
   -- jse setup
   ---------------------------------
-  gear.blueglenn.mnk = {
+  gear.globals.mnk = {
     capes = 
     { 
       dex_acc_att_double_attack_counter = { name="Segomo's Mantle", augments={'DEX+20','Accuracy+20 Attack+20','"Dbl.Atk."+10','System: 1 ID: 640 Val: 4',}},
@@ -82,18 +95,18 @@ function user_setup()
   
     artifact = {  head  = "Anchorite's crown +1",
                   body  = "Anchorite's cyclas +2",
-                  hands = "Anchorite's gloves +2",
+                  hands = "Anchorite's gloves +3",
                   legs  = "Anchorite's hose +2",
                   feet  = "Anchorite's gaiters +3" },
   
     relic = {     head  = "Hesychast's crown +1",
                   body  = "Hesychast's cyclas +1",
-                  hands = "Hesychast's gloves +2",
+                  hands = "Hesychast's gloves +3",
                   legs  = "Hesychast's hose +3",
                   feet  = "Hesychast's gaiters +2" },
   
     empyrean = {  head  = "Bhikku crown +1",
-                  body  = "Bhikku cyclas +1",
+                  body  = "Bhikku cyclas +2",
                   hands = "Bhikku gloves +1",
                   legs  = "Bhikku hose +1",
                   feet  = "Bhikku gaiters +1" }, 
@@ -136,17 +149,17 @@ function init_gear_sets()
   ---------------------------------
   sets.idle = { 
     ammo  = "Staunch Tathlum",
-    head  = gear.blueglenn.rao.head, -- regen +3
-    body  = gear.blueglenn.hizamaru.body, -- regen +12
-    hands = gear.blueglenn.rao.hands, -- regen +2
-    legs  = gear.blueglenn.nyame.legs,
+    head  = gear.globals.rao.head, -- regen +3
+    body  = gear.globals.hizamaru.body, -- regen +12
+    hands = gear.globals.rao.hands, -- regen +2
+    legs  = gear.globals.nyame.legs,
     feet  = "Hermes' Sandals", -- 12% movement speed
     neck  = "Bathy Choker +1", -- regen +3
     ear1  = "Etiolation Earring",
     ear2  = "Infused Earring", -- regen +1
-    ring1 = "Chirich ring +1", -- regen +2
+    ring1 = "Shneddick Ring",
     ring2 = "Defending ring",
-    back  = gear.blueglenn.mnk.capes.dex_acc_att_double_attack_counter, -- pdt cape when/if you get one
+    back  = "Moonbeam Cape",
     waist = "Moonbow Belt +1", 
   }
   
@@ -155,34 +168,48 @@ function init_gear_sets()
   ---------------------------------
   sets.engaged = {  
     ammo  = "Aurgelmir orb",
-    head  = "Mpaca's Cap",
+    head  = gear.globals.kendatsuba.head,
     body  = "Mpaca's Doublet",
     hands = "Mpaca's Gloves",
     legs  = "Mpaca's Hose",
-    feet  = gear.blueglenn.kendatsuba.feet,
-    neck  = gear.blueglenn.mnk.neck,
-    ear1  = "Mache Earring +1",
-    ear2  = "Sherida earring",
+    feet  = gear.globals.kendatsuba.feet,
+    neck  = gear.globals.mnk.neck,
+    ear1  = "Sherida Earring",
+    ear2  = "Telos earring",
     ring1 = "Epona's Ring",
     ring2 = "Gere Ring",
-    back  = gear.blueglenn.mnk.capes.dex_acc_att_double_attack_counter,
+    back  = gear.globals.mnk.capes.dex_acc_att_double_attack_counter,
     waist = "Moonbow Belt +1" 
   }
 
-  sets.engaged.Acc = set_combine(
+  sets.engaged.Accuracy = set_combine(
     sets.engaged, {  
-      ammo = "Falcon Eye",
-      head = gear.blueglenn.mummu.head,
+      ammo = "Mantoptera Eye",
+      hands= gear.globals.kendatsuba.hands,
+      legs = gear.globals.kendatsuba.legs,
+      feet = gear.globals.kendatsuba.feet,
       ear2 = "Mache Earring +1", 
+      ring1= "Chirich Ring"
     }
   ) 
 
+  sets.engaged['Glass Cannon'] = set_combine(
+    sets.engaged, {
+      ammo = "Coiste Bodhar",
+      head = gear.globals.adhemar.head,
+      body = gear.globals.kendatsuba.body,
+      hands= gear.globals.kendatsuba.hands,
+      legs = gear.globals.mnk.relic.legs,
+      feet = gear.globals.mnk.artifact.feet,
+    }
+  )
+
   -- 35 from job traits and gifts
-  sets.engaged.SubtleBlow = set_combine(
+  sets.engaged['Subtle Blow']= set_combine(
     sets.engaged, {
       ammo = "Expeditious Pinion", -- 7
-      head = gear.blueglenn.adhemar.head, -- 8
-      legs = gear.blueglenn.mpaca.legs, -- 5 (II)
+      head = gear.globals.adhemar.head, -- 8
+      legs = gear.globals.mpaca.legs, -- 5 (II)
       ear2 = "Sherida Earring", -- 5 (II)
       ring1= "Niqmaddu Ring", -- 5 (II) -- todo
       waist= "Moonbow Belt +1", -- 15 (II)
@@ -194,16 +221,16 @@ function init_gear_sets()
     sets.engaged, {
       ammo = "Amar Cluster", -- todo --2
       head = "Rao Kabuto", --todo path d --4
-      body = gear.blueglenn.mpaca.body,  --10
-      hands= gear.blueglenn.rao.hands, --5
-      legs = gear.blueglenn.mnk.artifact.legs, --6
-      feet = gear.blueglenn.mnk.relic.feet, --(no chance, but counter attack +24)
+      body = gear.globals.mpaca.body,  --10
+      hands= gear.globals.rao.hands, --5
+      legs = gear.globals.mnk.artifact.legs, --6
+      feet = gear.globals.mnk.relic.feet, --(no chance, but counter attack +24)
       neck = "Bathy Choker +1", --10
       ear1 = "Cryptic Earring", --3
       ear2 = "Sherida Earring",
       ring1= "Defending Ring",
       ring2= "Niqmaddu Ring", -- todo
-      back  = gear.blueglenn.mnk.capes.dex_acc_att_double_attack_counter, --10
+      back  = gear.globals.mnk.capes.dex_acc_att_double_attack_counter, --10
       waist = "Moonbow Belt +1" 
     }
   ) -- 62/80 (Spharai: +14, 76/80)
@@ -212,21 +239,23 @@ function init_gear_sets()
   ---------------------------------
   -- Job Abilities
   ---------------------------------
-  sets.precast.JA['Chakra']           = { body = gear.blueglenn.mnk.artifact.body, hands = gear.blueglenn.mnk.relic.hands }
-  sets.precast.JA['Hundred Fists']    = { legs = gear.blueglenn.mnk.relic.legs }
-  sets.precast.JA['Boost']            = { hands= gear.blueglenn.mnk.artifact.hands, waist = "Ask Sash" }
-  sets.precast.JA['Dodge']            = { feet = gear.blueglenn.mnk.artifact.feet }
-  sets.precast.JA['Focus']            = { head = gear.blueglenn.mnk.artifact.head }
-  sets.precast.JA['Counterstance']    = { feet = gear.blueglenn.mnk.relic.feet }
+  sets.precast.JA['Chi Blast']        = { head = gear.globals.mnk.relic.head }
+  sets.precast.JA['Chakra']           = { body = gear.globals.mnk.artifact.body, hands = gear.globals.mnk.relic.hands }
+  sets.precast.JA['Hundred Fists']    = { legs = gear.globals.mnk.relic.legs }
+  sets.precast.JA['Boost']            = { hands= gear.globals.mnk.artifact.hands, waist = "Ask Sash" }
+  sets.precast.JA['Dodge']            = { feet = gear.globals.mnk.artifact.feet }
+  sets.precast.JA['Focus']            = { head = gear.globals.mnk.artifact.head }
+  sets.precast.JA['Counterstance']    = { feet = gear.globals.mnk.relic.feet }
   sets.precast.JA['Footwork']         = { feet = "Shukuyu Sune-Ate" }
-  sets.precast.JA['Formless Strikes'] = { body = gear.blueglenn.mnk.relic.body }
-  sets.precast.JA['Mantra']           = { feet = gear.blueglenn.mnk.relic.feet }
+  sets.precast.JA['Formless Strikes'] = { body = gear.globals.mnk.relic.body }
+  sets.precast.JA['Mantra']           = { feet = gear.globals.mnk.relic.feet }
   sets.precast.JA['Boost'].OutOfCombat= sets.precast.JA['Boost']
 	
 	sets.engaged.HF = set_combine(sets.engaged, {}) -- do i need this set?  maybe ditch haste for accuracy and damage?
 
-	sets.buff.Impetus  = { body = gear.blueglenn.mnk.empyrean.body }
-	sets.buff.Footwork = { feet = gear.blueglenn.mnk.artifact.feet }
+  sets.buff.Focus    = { head = gear.globals.mnk.artifact.head }
+	sets.buff.Impetus  = { body = gear.globals.mnk.empyrean.body }
+	sets.buff.Footwork = { feet = gear.globals.mnk.artifact.feet }
 	sets.buff.Boost    = { waist = "Ask Sash" }
 	
   ---------------------------------
@@ -234,27 +263,27 @@ function init_gear_sets()
   ---------------------------------
   sets.precast.WS = { 
     ammo = "Knobkierrie",
-    head = gear.blueglenn.mpaca.head,
-    body = gear.blueglenn.mpaca.body,
-    hands= gear.blueglenn.mpaca.hands,
-    legs = gear.blueglenn.hizamaru.legs,
-    feet = gear.blueglenn.kendatsuba.feet,
+    head = gear.globals.mpaca.head,
+    body = gear.globals.mnk.empyrean.body,
+    hands= gear.globals.mpaca.hands,
+    legs = gear.globals.hizamaru.legs,
+    feet = gear.globals.kendatsuba.feet,
     neck = "Fotia Gorget",
     ear1 = "Sherida Earring",
-    ear2 = gear.blueglenn.moonshade,
+    ear2 = gear.globals.moonshade,
     ring1= "Chirich ring +1",
     ring2= "Gere Ring",
-    back = gear.blueglenn.mnk.capes.str_da,
+    back = gear.globals.mnk.capes.str_da,
     waist= "Fotia Belt", 
   }
 
   -- Ascetic's Fury: 50% STR / 50% VIT - Static fTP @1.0 - TP modifies critical hit rate - +20% / +30% / +50%
   sets.precast.WS["Ascetic's Fury"] = set_combine(
     sets.precast.WS, {
-      body = gear.blueglenn.mnk.artifact.body,
-      hands= gear.blueglenn.ryuo.hands,
-      legs = gear.blueglenn.kendatsuba.legs,
-      feet = gear.blueglenn.herculean.feet.ta_att,
+      body = gear.globals.mnk.empyrean.body,
+      hands= gear.globals.ryuo.hands,
+      legs = gear.globals.kendatsuba.legs,
+      feet = gear.globals.herculean.feet.ta_att,
       ring1= "Niqmaddu Ring", -- todo
       waist= "Moonbow Belt +1",
     }
@@ -264,17 +293,16 @@ function init_gear_sets()
   sets.precast.WS['Victory Smite'] = set_combine(
     sets.precast.WS, { 
       ammo  = "Knobkierrie",
-      head  = gear.blueglenn.adhemar.head,
-      body  = gear.blueglenn.kendatsuba.body,
-      hands = gear.blueglenn.ryuo.hands,
-      neck  = gear.blueglenn.mnk.neck,
-      body  = gear.blueglenn.kendatsuba.body,
-      legs  = gear.blueglenn.kendatsuba.legs,
-      feet  = gear.blueglenn.kendatsuba.feet,
+      head  = gear.globals.adhemar.head,
+      hands = gear.globals.ryuo.hands,
+      neck  = gear.globals.mnk.neck,
+      legs  = gear.globals.kendatsuba.legs,
+      feet  = gear.globals.kendatsuba.feet,
       ear1  = "Sherida Earring",
+      ear2  = "Odr Earring",
       ring1 = "Epona's Ring",
       waist = "Moonbow Belt +1", 
-      back  = gear.blueglenn.mnk.capes.str_crit
+      back  = gear.globals.mnk.capes.str_crit
     }
   )
 
@@ -282,11 +310,10 @@ function init_gear_sets()
   sets.precast.WS["Howling Fist"] = set_combine(
     sets.precast.WS, { 
       ammo  = "Knobkierrie",
-      head  = gear.blueglenn.mpaca.head,
-      body  = gear.blueglenn.mpaca.body,
-      hands = gear.blueglenn.mpaca.gloves,
-      legs  = gear.blueglenn.hizamaru.legs,
-      feet  = gear.blueglenn.mpaca.boots,
+      head  = gear.globals.mpaca.head,
+      hands = gear.globals.mpaca.gloves,
+      legs  = gear.globals.hizamaru.legs,
+      feet  = gear.globals.mpaca.boots,
     }
   )
                     
@@ -297,10 +324,10 @@ function init_gear_sets()
   sets.precast.WS["Tornado Kick"] = set_combine(
     sets.precast.WS, {
       ammo  = "Knobkierrie",
-      head  = gear.blueglenn.mpaca.head,
-      legs  = gear.blueglenn.mpaca.legs,
-      feet  = gear.blueglenn.mnk.artifact.feet,
-      neck  = gear.blueglenn.mnk.neck,
+      head  = gear.globals.mpaca.head,
+      legs  = gear.globals.mpaca.legs,
+      feet  = gear.globals.mnk.artifact.feet,
+      neck  = gear.globals.mnk.neck,
       ring2 = "Gere Ring" 
     }
   )
@@ -308,11 +335,10 @@ function init_gear_sets()
   -- Raging Fists: 30% STR / 30% DEX - Dynamic fTP: 1.0 / 2.19 / 3.75
   sets.precast.WS["Raging Fists"] = set_combine(
     sets.precast.WS, { 
-      head = gear.blueglenn.adhemar.head,
-      body = gear.blueglenn.adhemar.body,
-      hands= gear.blueglenn.adhemar.hands,
-      legs = gear.blueglenn.kendatsuba.legs,
-      feet = gear.blueglenn.herculean.feet.ta_att,
+      head = gear.globals.adhemar.head,
+      hands= gear.globals.adhemar.hands,
+      legs = gear.globals.kendatsuba.legs,
+      feet = gear.globals.herculean.feet.ta_att,
       ear1 = "Sherida Earring",
       ring1= "Niqmaddu Ring", -- todo
       waist= "Moonbow Belt +1",
@@ -322,18 +348,17 @@ function init_gear_sets()
   -- Shijin Spiral: 85% DEX - Static fTP @1.5 - TP modifies Plague (-50TP/tick @5-8 ticks) effect accuracy
   sets.precast.WS["Shijin Spiral"] = set_combine(
     sets.precast.WS, { 
-      head  = gear.blueglenn.mummu.head,
-      body  = gear.blueglenn.adhemar.body,
-      hands = gear.blueglenn.adhemar.hands,
-      legs  = gear.blueglenn.mnk.relic.legs,
-      feet  = gear.blueglenn.kendatsuba.feet,
-      neck  = gear.blueglenn.mnk.neck,
+      head  = gear.globals.mummu.head,
+      hands = gear.globals.adhemar.hands,
+      legs  = gear.globals.mnk.relic.legs,
+      feet  = gear.globals.kendatsuba.feet,
+      neck  = gear.globals.mnk.neck,
       ear1  = "Sherida Earring",
       ear2  = "Mache Earring +1",
       ring1 = "Niqmaddu Ring", -- todo
       ring2 = "Gere Ring",
       waist = "Moonbow Belt +1",
-      back  = gear.blueglenn.mnk.capes.dex_acc_att_double_attack_counter
+      back  = gear.globals.mnk.capes.dex_acc_att_double_attack_counter
     }
   )
 
@@ -345,9 +370,9 @@ function init_gear_sets()
   {
     ammo = "Hydrocera", -- 6 macc
     body = "Cohort Cloak", -- 100 macc (no head)
-    hands= gear.blueglenn.mummu.hands, -- 43 macc
-    legs = gear.blueglenn.nyame.legs, -- 40 macc
-    feet = gear.blueglenn.mummu.feet, -- 42 macc
+    hands= gear.globals.mummu.hands, -- 43 macc
+    legs = gear.globals.nyame.legs, -- 40 macc
+    feet = gear.globals.mummu.feet, -- 42 macc
     neck = "Sanctity Necklace", -- 10 macc
     ear1 = "Hermetic Earring", -- 7 macc
     ear2 = "Enchntr. Earring", -- 6 macc
@@ -355,6 +380,26 @@ function init_gear_sets()
     ring2= "Stikini Ring +1", -- 11 macc
     waist= "Eschan Stone", -- 7 macc
   } -- 280 macc
+end
+
+---------------------------------
+-- display stuff
+---------------------------------
+function drawDisplay()
+  local INDENT = ' ':rep(3)
+  local displayLines = L{}
+
+  -- Modes
+  displayLines:append('[I]dle: '..state.IdleMode.value)
+  displayLines:append('[O]ffense: '..state.OffenseMode.value)
+
+  displayLines:append(' - ')
+  -- Impetus Counter -- tool (bag)
+  displayLines:append('Impetus Counter: '..tostring(info.impetus_hit_count))
+
+  --displayBox:text(displayLines:concat('\\cr\n'))
+  displayBox:text(displayLines:concat(' | '))
+  displayBox:show()
 end
 
 ---------------------------------
@@ -372,8 +417,13 @@ end
 
 function job_precast(spell, action, spellMap, eventArgs)
   if spell.english:lower() == "victory smite" and buffactive["Impetus"] then
-    equip({ back = gear.blueglenn.mnk.capes.str_da })
+    equip({ back = gear.globals.mnk.capes.str_da })
   end
+end
+
+function job_state_change(field, newValue, oldValue)
+  -- any mode changed
+  drawDisplay()
 end
 ---------------------------------
 -- user defined functions 
@@ -414,9 +464,10 @@ function increment_impetus_counter(by)
 
     -- report every 10
     if new_milestone ~= old_milestone and new_count > 9 then -- new_count > 9 so we don't report 1-9
-      chat('Impetus hit counter: ' .. tostring(new_count))
+      --chat('Impetus hit counter: ' .. tostring(new_count)) -- commented out since i'm now tracking this in the display
     end
 
+    drawDisplay()
   end
 end
 
@@ -425,6 +476,7 @@ function reset_impetus_counter()
   if count_before_reset > 0 then
     info.impetus_hit_count = 0
     chat('Impetus hit counter reset to 0')
+    drawDisplay()
   end
 end
 

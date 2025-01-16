@@ -234,7 +234,7 @@ gear.bluefriend = {
   {     
     head  = "Inyanga tiara +2",
     body  = "Inyanga jubbah +2",
-    hands = "Inyanga dastanas +1",
+    hands = "Inyanga dastanas +2",
     legs  = "Inyanga shalwar +2",
     feet  = "Inyanga crackows +2" 
   },

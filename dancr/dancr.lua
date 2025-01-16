@@ -70,6 +70,10 @@ function handle_hide()
   is_hidden = true
 end
 
+function handle_toggle() 
+  is_hidden = not is_hidden
+end
+
 function handle_verbose()
   verbose = not verbose
 end
@@ -181,12 +185,6 @@ function get_nfr_obj()
   }
 end
 
-function load_all_job_abilities()
-  for k,v in pairs(res.job_abilities) do
-    all_items[string.lower(v.english)] = { id = k, name = v.english, recast_id = v.recast_id }
-  end
-end
-
 function load_flourishes()
    -- these are recast_id from ~/res/job_abilities.lua
    local f1_recast = math.ceil(get_recast_time(221))
@@ -238,6 +236,7 @@ end
 --  Command Handlers    --
 --------------------------
 handlers = {
+    [''] = handle_toggle,
     ['help'] = handle_help,
     ['h'] = handle_help,
     ['show'] = handle_show,

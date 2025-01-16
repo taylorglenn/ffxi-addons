@@ -236,6 +236,11 @@ function load_all_items()
   end
 end
 
+function startup()
+  load_all_items()
+  draw_box()
+end
+
 --------------------------
 --  Command Handlers    --
 --------------------------
@@ -269,7 +274,7 @@ end
 --  Windower Events     --
 --------------------------
 windower.register_event('addon command', handle_command)
-windower.register_event('load', load_all_items)
-windower.register_event('prerender', draw_box)
+windower.register_event('load', startup)
+--windower.register_event('prerender', draw_box)
 windower.register_event('add item', draw_box)
 windower.register_event('remove item', draw_box)

@@ -105,10 +105,15 @@ function drawBox()
   end
 
   local currentPet = getCurrentPet()
-  if (currentPet == nil) then return end
+  if (currentPet == nil) then
+    box:hide()
+    return 
+  end
 
   local boxLines = L{}
   local INDENT = ' ':rep(3)
+
+  -- biscuits
 
   -- Your ready charges
   local readyCharges = getReadyCharges()
@@ -142,6 +147,7 @@ end
 ------------------------------
 function isPlayerBst()
   local player = windower.ffxi.get_player()
+  if (player == nil) then return false end
   return player.main_job == 'BST'
 end
 

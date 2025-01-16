@@ -2,10 +2,15 @@
 <settings>
     <global>
         <lists>
+            <dagger3step>Evisceration,Rudra&apos;s Storm,Rudra&apos;s Storm</dagger3step>
+            <ga3step>Full Break,Upheaval,Ukko&apos;s Fury,Upheaval</ga3step>
+            <ga4step>Full Break,Upheaval,Ukko&apos;s Fury,Upheaval</ga4step>
             <mnk3step>Asuran Fists,Raging Fists,Victory Smite</mnk3step>
             <mnk4step>Asuran Fists,Raging Fists,Victory Smite,Victory Smite</mnk4step>
+            <nin4step>Blade: Shun,Blade: Ten,Blade: Kamu,Blade: Shun</nin4step>
             <sam4step>Tachi: Fudo,Tachi: Kasha,Tachi: Shoha,Tachi: Fudo</sam4step>
             <thf>Shark Bite,Rudra&apos;s Storm,Evisceration,Rudra&apos;s Storm</thf>
+            <thf3step>Evisceration,Rudra&apos;s Storm,Rudra&apos;s Storm</thf3step>
         </lists>
     </global>
 </settings>

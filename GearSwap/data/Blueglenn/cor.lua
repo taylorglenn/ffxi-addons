@@ -5,7 +5,6 @@ function get_sets()
   -- Load and initialize the include file.
   mote_include_version = 2
   include('Mote-Include.lua')
-  include('organizer-lib')
 end
 
 ---------------------------------
@@ -29,27 +28,6 @@ end
 set_macros(1, 9)
 
 ---------------------------------
--- dressup 
----------------------------------
-function dressup(race, gender, face)
-  send_command('@input //lua l dressup')
-  if not race or not gender or not face then send_command('@input //du clear self') return end
-  send_command('@input //du self race ' .. race .. ' ' .. gender)
-  send_command('@wait 2; input //du self face ' .. tostring(face))
-end
-dressup('hume', 'female', 3)
-
----------------------------------
--- organizer 
----------------------------------
-cor_organizer_items = {
-  bullet="chrono bullet",
-  cards="trump card",
-}
---for k,v in pairs(cor_organizer_items) do organizer_items[k] = v end
-send_command('@input //gs org;wait6; input //gs validate')
-
----------------------------------
 -- globals
 ---------------------------------
 flurry = 1
@@ -64,7 +42,7 @@ function user_setup()
   ---------------------------------
   -- jse setup
   ---------------------------------
-  gear.blueglenn.cor = {
+  gear.globals.cor = {
     capes = {     int_eva_snapshot  = { name="Camulus's Mantle", augments={'INT+20','Eva.+20 /Mag. Eva.+20','"Snapshot"+10',}},
                   agi_rng_wsd       = { name="Camulus's Mantle", augments={'AGI+20','Rng.Acc.+20 Rng.Atk.+20','Weapon skill damage +10%',}}},
 
@@ -99,130 +77,135 @@ function init_gear_sets()
   ---------------------------------
   sets.idle = { --range = "Fomalhaut",
                 ammo  = "Chrono Bullet",
-                head  = gear.blueglenn.adhemar.head,
-                body  = gear.blueglenn.adhemar.body,
-                hands = gear.blueglenn.adhemar.hands,
-                legs  = gear.blueglenn.carmine.legs,
-                feet  = gear.blueglenn.meghanada.feet,
+                head  = gear.globals.adhemar.head,
+                body  = gear.globals.adhemar.body,
+                hands = gear.globals.adhemar.hands,
+                legs  = gear.globals.carmine.legs,
+                feet  = gear.globals.meghanada.feet,
                 neck  = "Bathy Choker +1",
                 waist = "Windbuffet Belt +1",
                 ring1 = "Defending Ring",
-                ring2 = "Gelatinous Ring +1",
+                ring2 = "Shneddick Ring",
                 ear1  = "Telos Earring",
                 ear2  = "Cessance Earring" }
   
-  sets.idle.town  = set_combine(sets.idle, { legs = gear.blueglenn.carmine.legs })
+  sets.idle.Town  = set_combine(sets.idle, { legs = gear.globals.carmine.legs, feet = "Hermes' Sandals" })
 
   ---------------------------------
   -- Job Abilities
   ---------------------------------
   sets.precast.JA = { 
-    ["Fold"]         = {  body  = gear.blueglenn.cor.relic.body },
-    ["QuickDraw"]    = {  head  = gear.blueglenn.herculean.head.mab,
-                          body  = gear.blueglenn.cor.relic.body,
-                          hands = gear.blueglenn.carmine.hands,
-                          legs  = gear.blueglenn.cor.relic.legs,
-                          feet  = gear.blueglenn.cor.relic.feet,
+    ["Fold"]         = {  body  = gear.globals.cor.relic.body },
+    ["QuickDraw"]    = {  head  = gear.globals.herculean.head.mab,
+                          body  = gear.globals.cor.relic.body,
+                          hands = gear.globals.carmine.hands,
+                          legs  = gear.globals.cor.relic.legs,
+                          feet  = gear.globals.cor.relic.feet,
                           neck  = "Baetyl Pendant",
                           waist = "Eschan Stone",
                           ring1 = "Shiva Ring +1",
                           ring2 = "Acumen Ring",
                           ear1  = "Friomisi Earring",
                           ear2  = "Novio Earring",
-                          back  = gear.blueglenn.cor.capes.agi_rng_wsd }, -- should replace with an AGI/MACC/MAB cape
-    ["RandomDeal"]   = {  body  = gear.blueglenn.cor.relic.body },
-    ["SnakeEye"]     = {  legs  = gear.blueglenn.cor.relic.legs },
-    ["TripleShot"]   = {  body  = gear.blueglenn.cor.empyrean.body },
-    ["WildCard"]     = {  feet  = gear.blueglenn.cor.relic.feet }
+                          back  = gear.globals.cor.capes.agi_rng_wsd }, -- should replace with an AGI/MACC/MAB cape
+    ["RandomDeal"]   = {  body  = gear.globals.cor.relic.body },
+    ["SnakeEye"]     = {  legs  = gear.globals.cor.relic.legs },
+    ["TripleShot"]   = {  body  = gear.globals.cor.empyrean.body },
+    ["WildCard"]     = {  feet  = gear.globals.cor.relic.feet }
   }
 
-  sets.TripleShot = { head = gear.blueglenn.oshosi.head,
-                      body = gear.blueglenn.cor.empyrean.body,
-                      hands= gear.blueglenn.cor.relic.hands,
-                      legs = gear.blueglenn.oshosi.legs,
-                      feet = gear.blueglenn.oshosi.feet }
+  sets.TripleShot = { head = gear.globals.oshosi.head,
+                      body = gear.globals.cor.empyrean.body,
+                      hands= gear.globals.cor.relic.hands,
+                      legs = gear.globals.oshosi.legs,
+                      feet = gear.globals.oshosi.feet }
 
   ---------------------------------
   -- Corsair Roll ("Phantom Roll" in game)
   ---------------------------------
   sets.precast.CorsairRoll = {  main  = "Rostam",
                                 range = "Compensator",
-                                head  = gear.blueglenn.cor.relic.head,
-                                neck  = gear.blueglenn.cor.neck,
-                                body  = gear.blueglenn.meghanada.body,
-                                hands = gear.blueglenn.cor.empyrean.hands,
-                                feet  = gear.blueglenn.cor.relic.feet,
+                                head  = gear.globals.cor.relic.head,
+                                neck  = gear.globals.cor.neck,
+                                body  = gear.globals.meghanada.body,
+                                hands = gear.globals.cor.empyrean.hands,
+                                feet  = gear.globals.cor.relic.feet,
                                 ring1 = "Defending Ring",
                                 ring2 = "Barataria Ring",
-                                back  = gear.blueglenn.cor.capes.int_eva_snapshot,
+                                back  = gear.globals.cor.capes.int_eva_snapshot,
                                 waist = "Flume belt", }
 
   ---------------------------------
   -- Weapon Skills
   ---------------------------------
-  sets.precast.WS     = { head  = gear.blueglenn.cor.relic.head,-- default for any weapon skill that isn't more specifically defined
-                          ear1  = "Telos earring",
-                          ear2  = { name = "Moonshade earring", augments = { "Accuracy+4", "TP Bonus +250"}},
-                          body  = gear.blueglenn.cor.artifact.body,
-                          hands = gear.blueglenn.meghanada.hands,
-                          legs  = gear.blueglenn.cor.artifact.legs,
-                          feet  = gear.blueglenn.cor.relic.feet,
-                          ring1 = "Chirich ring +1",
-                          ring2 = "Rajas ring",
-                          back  = gear.blueglenn.cor.capes.agi_rng_wsd,
-                          waist = "Fotia belt", }
+  sets.precast.WS     = 
+  { 
+    ammo  = "Chrono Bullet",
+    head  = gear.globals.cor.relic.head,-- default for any weapon skill that isn't more specifically defined
+    ear1  = "Telos earring",
+    ear2  = { name = "Moonshade earring", augments = { "Accuracy+4", "TP Bonus +250"}},
+    body  = gear.globals.cor.artifact.body,
+    hands = gear.globals.meghanada.hands,
+    legs  = gear.globals.cor.artifact.legs,
+    feet  = gear.globals.cor.relic.feet,
+    ring1 = "Chirich ring +1",
+    ring2 = "Rajas ring",
+    back  = gear.globals.cor.capes.agi_rng_wsd,
+    waist = "Fotia belt", 
+  }
 
   sets.precast.WS["Last Stand"] = set_combine(sets.precast.WS, {  
-                                              head  = gear.blueglenn.cor.relic.head,
-                                              neck  = gear.blueglenn.cor.neck, -- Use Fotia Gorget when you get it
+                                              head  = gear.globals.cor.relic.head,
+                                              neck  = "Fotia Gorget",
                                               ear2  = { name = "Moonshade earring", augments = { "Accuracy+4", "TP Bonus +250"}},
                                               ear1  = "Telos earring", -- Ishvara is better when you can get it
-                                              body  = gear.blueglenn.cor.artifact.body,
-                                              hands = gear.blueglenn.meghanada.hands,
-                                              ring1 = "Hajduk Ring", -- Regal Ring is best swap here
+                                              body  = gear.globals.cor.artifact.body,
+                                              hands = gear.globals.meghanada.hands,
+                                              ring1 = "Apate Ring", -- Regal Ring is best swap here
                                               ring2 = "Hajduk Ring +1", -- Epaminondas's Ring (STP-10, WSD+5%) is good swap if you don't need the acc from Hajduk
-                                              back  = gear.blueglenn.cor.capes.agi_rng_wsd,
+                                              back  = gear.globals.cor.capes.agi_rng_wsd,
                                               waist = "Fotia belt",
-                                              legs  = gear.blueglenn.meghanada.legs,
-                                              feet  = gear.blueglenn.cor.relic.feet })
+                                              legs  = gear.globals.meghanada.legs,
+                                              feet  = gear.globals.cor.relic.feet })
 
-  sets.precast.WS["Leaden Salute"] = set_combine(sets.precast.WS, {  
+  sets.precast.WS['Leaden Salute'] = set_combine(sets.precast.WS, {  
                                               head  = "Pixie Hairpin +1",
-                                              neck  = gear.blueglenn.cor.neck,
+                                              neck  = gear.globals.cor.neck,
                                               ear2  = { name = "Moonshade earring", augments = { "Accuracy+4", "TP Bonus +250"}},
                                               ear1  = "Friomisi earring",
-                                              body  = gear.blueglenn.cor.relic.body,
-                                              hands = gear.blueglenn.carmine.hands, -- herc hands with wsd are probably better
+                                              body  = gear.globals.cor.relic.body,
+                                              hands = gear.globals.carmine.hands, -- herc hands with wsd are probably better
                                               ring1 = "Archon Ring",
                                               ring2 = "Acumen Ring", -- Dingir Ring is good if you can get it
-                                              back  = gear.blueglenn.cor.capes.agi_rng_wsd,
-                                              waist = "Eschan Stone",
-                                              legs  = gear.blueglenn.cor.artifact.legs, -- Herc with AGI/MAB/WSD is better, Shned. Tights +1 is also a good swap
-                                              feet  = gear.blueglenn.cor.relic.feet })
+                                              back  = gear.globals.cor.capes.agi_rng_wsd,
+                                              --waist = "Eschan Stone",
+                                              wait  = "Hachirin-no-obi",
+                                              legs  = gear.globals.cor.artifact.legs, -- Herc with AGI/MAB/WSD is better, Shned. Tights +1 is also a good swap
+                                              feet  = gear.globals.cor.relic.feet })
 
   sets.precast.WS["Wildfire"]      = set_combine(sets.precast.WS, {  
-                                              head  = gear.blueglenn.cor.relic.head,-- change to herculean.head.wsd when you get one
-                                              neck  = gear.blueglenn.cor.neck,
+                                              head  = gear.globals.herculean.head.mab,
+                                              neck  = gear.globals.cor.neck,
                                               ear1  = "Novio Earring",
                                               ear2  = "Friomisi earring",
-                                              body  = gear.blueglenn.cor.relic.body,
-                                              hands = gear.blueglenn.carmine.hands, -- herc hands with wsd are probably better
+                                              body  = gear.globals.cor.relic.body,
+                                              hands = gear.globals.carmine.hands, -- herc hands with wsd are probably better
                                               ring1 = "Shiva ring +1",
                                               ring2 = "Acumen Ring",
-                                              back  = gear.blueglenn.cor.capes.agi_rng_wsd,
+                                              back  = gear.globals.cor.capes.agi_rng_wsd,
                                               waist = "Eschan Stone", -- Skrymir Cord +1 is better, but who has the cash?
-                                              legs  = gear.blueglenn.cor.artifact.legs, -- Herc with AGI/MAB/WSD is better, Shned. Tights +1 is also a good swap
-                                              feet  = gear.blueglenn.cor.relic.feet })
+                                              legs  = gear.globals.cor.artifact.legs, -- Herc with AGI/MAB/WSD is better, Shned. Tights +1 is also a good swap
+                                              feet  = gear.globals.cor.relic.feet })
 
   sets.precast.WS["Savage Blade"]  = set_combine(sets.precast.WS, {  
-                                              head  = gear.blueglenn.herculean.head.wsd,
-                                              hands = gear.blueglenn.meghanada.hands,
-                                              --legs  = gear.blueglenn.herculean.legs.wsd,
-                                              neck  = gear.blueglenn.cor.neck,
+                                              head  = gear.globals.herculean.head.wsd,
+                                              hands = gear.globals.meghanada.hands,
+                                              --legs  = gear.globals.herculean.legs.wsd,
+                                              neck  = gear.globals.cor.neck,
                                               --ring1 = "Regal Ring",  -- drops from omen, so... don't hold your breath
                                               --ring2 = "Epaminodas's Ring", -- i'll never get this lol
-                                              back  = gear.blueglenn.cor.capes.agi_rng_wsd,
-                                              waist = "Sailfi Belt +1" -- drops from arthro UNM.  go git 'em, boys
+                                              back  = gear.globals.cor.capes.agi_rng_wsd,
+                                              waist = "Sailfi Belt +1"
                                             })
 
   sets.precast.WS["Requiescat"]    = set_combine(sets.precast.WS, { })
@@ -230,29 +213,29 @@ function init_gear_sets()
   sets.precast.WS["Evisceration"]  = set_combine(sets.precast.WS, { })
 
   sets.precast.WS["Aeolian Edge"]  = set_combine(sets.precast.WS, {  
-                                              head  = gear.blueglenn.herculean.head.mab,
+                                              head  = gear.globals.herculean.head.mab,
                                               neck  = "Stoicheion medal",
                                               ear2  = { name = "Moonshade earring", augments = { "Accuracy+4", "TP Bonus +250"}},
                                               ear2  = "Friomisi earring",
-                                              body  = gear.blueglenn.cor.relic.body,
-                                              hands = gear.blueglenn.meghanada.hands,
+                                              body  = gear.globals.cor.relic.body,
+                                              hands = gear.globals.meghanada.hands,
                                               ring1 = "Shiva ring +1",
                                               ring2 = "Acumen Ring",
-                                              back  = gear.blueglenn.cor.capes.agi_rng_wsd,
+                                              back  = gear.globals.cor.capes.agi_rng_wsd,
                                               waist = "Fotia belt",
-                                              legs  = gear.blueglenn.cor.artifact.legs,
-                                              feet  = gear.blueglenn.cor.relic.feet })
+                                              legs  = gear.globals.cor.artifact.legs,
+                                              feet  = gear.globals.cor.relic.feet })
 
   ---------------------------------
   -- Melee
   ---------------------------------
   sets.engaged            = { --ammo = "Chrono Bullet",
-                              head = gear.blueglenn.adhemar.head,
-                              body = gear.blueglenn.adhemar.body,
-                              hands = gear.blueglenn.adhemar.hands,
-                              legs = gear.blueglenn.carmine.legs,
-                              feet = gear.blueglenn.meghanada.feet,
-                              neck = gear.blueglenn.cor.neck,
+                              head = gear.globals.adhemar.head,
+                              body = gear.globals.adhemar.body,
+                              hands = gear.globals.adhemar.hands,
+                              legs = gear.globals.carmine.legs,
+                              feet = gear.globals.meghanada.feet,
+                              neck = gear.globals.cor.neck,
                               ear1 = "Telos earring",
                               ear2 = "Cessance Earring",
                               --ring1 = "Defending Ring",
@@ -268,42 +251,42 @@ function init_gear_sets()
   -- Ranged
   ---------------------------------
   sets.precast.RA         = { range = "Fomalhaut",
-                              head  = gear.blueglenn.cor.empyrean.head,
-                              body  = gear.blueglenn.cor.artifact.body, -- use su3 body when you get it
-                              hands = gear.blueglenn.carmine.hands,
-                              back  = gear.blueglenn.cor.capes.int_eva_snapshot,
-                              neck  = gear.blueglenn.cor.neck, 
+                              head  = gear.globals.cor.empyrean.head,
+                              body  = gear.globals.cor.artifact.body, -- use su3 body when you get it
+                              hands = gear.globals.carmine.hands,
+                              back  = gear.globals.cor.capes.int_eva_snapshot,
+                              neck  = gear.globals.cor.neck, 
                               waist = "Yemaya belt",
-                              legs  = gear.blueglenn.oshosi.legs,
-                              feet  = gear.blueglenn.meghanada.feet,
+                              legs  = gear.globals.oshosi.legs,
+                              feet  = gear.globals.meghanada.feet,
                               ring1 = "Defending Ring",
                               ring2 = "Gelatinous Ring +1" }
 
-  sets.precast.RA.Flurry  = set_combine(sets.precast.RA, { body=gear.blueglenn.cor.artifact.body })
+  sets.precast.RA.Flurry  = set_combine(sets.precast.RA, { body=gear.globals.cor.artifact.body })
   sets.precast.RA.Flurry2 = set_combine(sets.precast.RA, {
-                            head = gear.blueglenn.cor.empyrean.head,
-                            body = gear.blueglenn.cor.artifact.body,
-                            feet = gear.blueglenn.meghanada.feet })
+                            head = gear.globals.cor.empyrean.head,
+                            body = gear.globals.cor.artifact.body,
+                            feet = gear.globals.meghanada.feet })
 
-  sets.precast.RA.Flurry1 = set_combine(sets.precast.RA, { body = gear.blueglenn.cor.artifact.body })
+  sets.precast.RA.Flurry1 = set_combine(sets.precast.RA, { body = gear.globals.cor.artifact.body })
 
   sets.precast.RA.Flurry2 = set_combine(sets.precast.RA.Flurry1, {
-                            head = gear.blueglenn.cor.empyrean.head, 
+                            head = gear.globals.cor.empyrean.head, 
                             feet = "Pursuer's Gaiters", 
-                            neck = gear.blueglenn.cor.neck })
+                            neck = gear.globals.cor.neck })
 
   sets.midcast.RA         = { range = "Fomalhaut",
-                              head  = gear.blueglenn.meghanada.head,
-                              body  = gear.blueglenn.adhemar.body,
+                              head  = gear.globals.meghanada.head,
+                              body  = gear.globals.adhemar.body,
                               neck  = "Marked Gorget",
                               ear1  = "Telos earring",
-                              hands = gear.blueglenn.meghanada.hands,
+                              hands = gear.globals.meghanada.hands,
                               ring1 = "Chirich ring +1",
                               ring2 = "Hajduk ring +1",
-                              back  = gear.blueglenn.cor.capes.int_eva_snapshot,
+                              back  = gear.globals.cor.capes.int_eva_snapshot,
                               waist = "Yemaya belt",
-                              legs  = gear.blueglenn.meghanada.legs,
-                              feet  = gear.blueglenn.meghanada.feet }
+                              legs  = gear.globals.meghanada.legs,
+                              feet  = gear.globals.meghanada.feet }
 
 end
 

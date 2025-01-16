@@ -5,7 +5,6 @@ function get_sets()
   -- Load and initialize the include file.
   mote_include_version = 2
   include('Mote-Include.lua')
-  include('organizer-lib')
 end
 
 --------------------------------------------------------------------------
@@ -14,11 +13,6 @@ end
 lockstyle_set = "06" -- this one needs to be a string
 default_macro_book = 3
 default_macro_page = 1
-
----------------------------------
--- organizer 
----------------------------------
-send_command('@input //gs org;wait6; input //gs validate')
 
 --------------------------------------------------------------------------
 -----------------------     job setup      -------------------------------
@@ -55,29 +49,42 @@ function user_setup()
   ---------------------------------
   -- jse setup
   ---------------------------------
-  gear.blueglenn.brd = {
-    capes = { fast_cast = { name="Intarabus's Cape", augments={'CHR+20','Mag. Acc+20 /Mag. Dmg.+20','"Fast Cast"+10',}},
-              cure      = { name="Intarabus's Cape", augments={'MND+20','Eva.+20 /Mag. Eva.+20','MND+10','"Cure" potency +10%','Spell interruption rate down-10%',}}, },
+  gear.globals.brd = 
+  {
+    capes = 
+    { 
+      fast_cast = { name="Intarabus's Cape", augments={'CHR+20','Mag. Acc+20 /Mag. Dmg.+20','"Fast Cast"+10',}},
+      cure      = { name="Intarabus's Cape", augments={'MND+20','Eva.+20 /Mag. Eva.+20','MND+10','"Cure" potency +10%','Spell interruption rate down-10%',}}, 
+    },
     
     neck = "Bard's charm +1",
 
-    artifact = {  head  = "Brioso roundlet +2",
-                  body  = "Brioso justaucorps +3",
-                  hands = "Brioso cuffs +2",
-                  legs  = "Brioso cannions +3",
-                  feet  = "Brioso slippers +2" },
+    artifact = 
+    {  
+      head  = "Brioso roundlet +2",
+      body  = "Brioso justaucorps +3",
+      hands = "Brioso cuffs +2",
+      legs  = "Brioso cannions +3",
+      feet  = "Brioso slippers +2" 
+    },
   
-    relic = {     head  = "Bihu roundlet +3",
-                  body  = "Bihu justaucorps +3",
-                  hands = "Bihu cuffs +3",
-                  legs  = "Bihu cannions +3",
-                  feet  = "Bihu slippers +3" },
+    relic = 
+    {     
+      head  = "Bihu roundlet +3",
+      body  = "Bihu justaucorps +3",
+      hands = "Bihu cuffs +3",
+      legs  = "Bihu cannions +3",
+      feet  = "Bihu slippers +3" 
+    },
   
-    empyrean = {  head  = "Fili calot +1",
-                  body  = "Fili hongreline +1",
-                  hands = "Fili manchettes +1",
-                  legs  = "Fili rhingrave +1",
-                  feet  = "Fili cothurnes +1" },
+    empyrean = 
+    {  
+      head  = "Fili calot +1",
+      body  = "Fili hongreline +1",
+      hands = "Fili manchettes +1",
+      legs  = "Fili rhingrave +1",
+      feet  = "Fili cothurnes +1" 
+    },
   }
 end
 
@@ -113,16 +120,16 @@ function init_gear_sets()
   --------------------------------------------------------------------------
   sets.idle = 
   { 
-    head  = gear.blueglenn.nyame.head,  --7% DT
-    body  = gear.blueglenn.nyame.body,  --9% DT
-    hands = gear.blueglenn.nyame.hands, --7% DT
-    legs  = gear.blueglenn.nyame.legs,  --8% DT
-    feet  = gear.blueglenn.brd.empyrean.feet, --18% Movement Speed
+    head  = gear.globals.nyame.head,  --7% DT
+    body  = gear.globals.nyame.body,  --9% DT
+    hands = gear.globals.nyame.hands, --7% DT
+    legs  = gear.globals.nyame.legs,  --8% DT
+    feet  = gear.globals.brd.empyrean.feet, --18% Movement Speed
     neck  = "Bathy Choker +1",  --3 Regen
     ear1  = "Genmei Earring",   --2% PDT 
     ear2  = "Infused Earring",  --1 Regen
     ring1 = "Defending Ring",   --10% DT
-    ring2 = "Stikini Ring +1",  --1 Refresh
+    ring2 = "Shneddick Ring",
     back  = "Moonbeam Cape",    --5% DT
     waist = "Flume Belt",       --4% PDT
   } --46% DT, 52/50% PDT
@@ -133,33 +140,33 @@ function init_gear_sets()
   -- spells
   sets.precast.FC = 
   { 
-    head = gear.blueglenn.brd.empyrean.head, --14% song FC
-    body = gear.blueglenn.inyanga.body, --14% FC
-    hands= "Gendewitha Gages", --4% song FC
-    legs = gear.blueglenn.ayanmo.legs, --6% FC
-    feet = gear.blueglenn.brd.relic.feet, --10% song FC
+    head = gear.globals.brd.empyrean.head, --14% song FC
+    body = gear.globals.inyanga.body, --14% FC
+    hands= "Gende. Gages +1", --4% song FC
+    legs = gear.globals.ayanmo.legs, --6% FC
+    feet = gear.globals.brd.relic.feet, --10% song FC
     neck = "Mnbw. Whistle +1",
     ear1 = "Enchntr. Earring", --2% FC
     ear2 = "Loquac. Earring", --2% FC
     ring1= "Prolix Ring", --2% FC
     ring2= "Kishar Ring", --4% FC
-    back = gear.blueglenn.brd.capes.fast_cast, --10% FC
+    back = gear.globals.brd.capes.fast_cast, --10% FC
     waist= "Witful Belt" --3% FC -- Embla Sash (1000 Domain points)
   } --43% FC + 28% song FC = 71/80 FC
 
   sets.precast.FC.Cure =  
   { 
-    head = gear.blueglenn.kaykaus.head,
-    body = gear.blueglenn.inyanga.body,
+    head = gear.globals.kaykaus.head,
+    body = gear.globals.inyanga.body,
     hands= "Gendewitha Gages",
-    legs = gear.blueglenn.kaykaus.legs,
-    feet = gear.blueglenn.kaykaus.feet,
+    legs = gear.globals.kaykaus.legs,
+    feet = gear.globals.kaykaus.feet,
     neck = "Twilight Torque",
     ear1 = "Enchntr. Earring +1",
     ear2 = "Loquac. Earring",
     ring1= "Kishar Ring",
     ring2= "Defending Ring",
-    back = gear.blueglenn.brd.capes.fast_cast,
+    back = gear.globals.brd.capes.fast_cast,
     waist= "Witful Belt", 
   }
 
@@ -178,23 +185,23 @@ function init_gear_sets()
   sets.precast.Waltz = {}
 
   -- job abilities
-  sets.precast.JA["Nightingale"]= { feet = gear.blueglenn.brd.relic.feet }
-  sets.precast.JA["Soul Voice"] = { legs = gear.blueglenn.brd.relic.legs }
-  sets.precast.JA["Troubadour"] = { body = gear.blueglenn.brd.relic.body }
+  sets.precast.JA["Nightingale"]= { feet = gear.globals.brd.relic.feet }
+  sets.precast.JA["Soul Voice"] = { legs = gear.globals.brd.relic.legs }
+  sets.precast.JA["Troubadour"] = { body = gear.globals.brd.relic.body }
 
   -- weapon skills
   sets.precast.WS["Savage Blade"] = 
   { 
-    head  = gear.blueglenn.lustratio.head,  -- 39 str + 8 str
-    body  = gear.blueglenn.brd.relic.body,  -- 39 str / 38 mnd
-    hands = gear.blueglenn.brd.relic.hands, -- 16 str / 42 mnd
-    legs  = gear.blueglenn.brd.relic.legs,  -- 33 str / 43 mnd
-    feet  = gear.blueglenn.lustratio.feet,  -- 32 str + 15 str
-    neck  = gear.blueglenn.brd.neck, 
+    head  = gear.globals.lustratio.head,  -- 39 str + 8 str
+    body  = gear.globals.brd.relic.body,  -- 39 str / 38 mnd
+    hands = gear.globals.brd.relic.hands, -- 16 str / 42 mnd
+    legs  = gear.globals.brd.relic.legs,  -- 33 str / 43 mnd
+    feet  = gear.globals.lustratio.feet,  -- 32 str + 15 str
+    neck  = gear.globals.brd.neck, 
     ear1  = "Moonshade Earring",
     ring1 = "Apate Ring",                   -- 6 str
     ring2 = "Stikini Ring +1",              -- 8 mnd
-    back  = gear.blueglenn.brd.capes.cure   -- 30 mnd
+    back  = gear.globals.brd.capes.cure   -- 30 mnd
   } 
 
   --------------------------------------------------------------------------
@@ -204,94 +211,94 @@ function init_gear_sets()
   sets.midcast.FastRecast = sets.precast.FC
 
   -- Gear to enhance certain classes of songs.
-  sets.midcast.Ballad     = { legs = gear.blueglenn.brd.empyrean.legs }
+  sets.midcast.Ballad     = { legs = gear.globals.brd.empyrean.legs }
   --sets.midcast.Carol    = { hands= "Mousai Gages +1" }
   --sets.midcast.Etude    = { head = "Mousai Turban +1" }
-  sets.midcast.HonorMarch = { range= "Marsyas", hands = gear.blueglenn.brd.empyrean.hands } 
-  sets.midcast.Madrigal   = { head = gear.blueglenn.brd.empyrean.head }
+  sets.midcast.HonorMarch = { range= "Marsyas", hands = gear.globals.brd.empyrean.hands } 
+  sets.midcast.Madrigal   = { head = gear.globals.brd.empyrean.head }
   --sets.midcast.Mambo    = { feet = "Mousai Crackows +1" }
-  sets.midcast.March      = { hands= gear.blueglenn.brd.empyrean.hands }
+  sets.midcast.March      = { hands= gear.globals.brd.empyrean.hands }
   --sets.midcast.Minne    = { legs = "Mousai Seraweels +1" }
-  sets.midcast.Minuet     = { body = gear.blueglenn.brd.empyrean.body }
-  sets.midcast.Paeon      = { head = gear.blueglenn.brd.artifact.head }
+  sets.midcast.Minuet     = { body = gear.globals.brd.empyrean.body }
+  sets.midcast.Paeon      = { head = gear.globals.brd.artifact.head }
   --sets.midcast.Threnody = { body = "Mou. Manteel +1" }
 
-  sets.midcast['Adventurer\'s Dirge'] = { range= "Marsyas", hands = gear.blueglenn.brd.relic.hands }
-  sets.midcast['Foe Sirvente']        = { head = gear.blueglenn.brd.relic.head }
-  sets.midcast['Magic Finale']        = { legs = gear.blueglenn.brd.empyrean.legs }
-  sets.midcast["Sentinel's Scherzo"]  = { feet = gear.blueglenn.brd.empyrean.feet }
+  sets.midcast['Adventurer\'s Dirge'] = { range= "Marsyas", hands = gear.globals.brd.relic.hands }
+  sets.midcast['Foe Sirvente']        = { head = gear.globals.brd.relic.head }
+  sets.midcast['Magic Finale']        = { legs = gear.globals.brd.empyrean.legs }
+  sets.midcast["Sentinel's Scherzo"]  = { feet = gear.globals.brd.empyrean.feet }
   sets.midcast["Chocobo Mazurka"]     = { range= "Marsyas" }
 
   -- For song buffs (duration and AF3 set bonus)
   sets.midcast.SongEnhancing = 
   { 
-    head = gear.blueglenn.brd.empyrean.head,
-    body = gear.blueglenn.brd.empyrean.body,
-    hands= gear.blueglenn.brd.empyrean.hands,
-    legs = gear.blueglenn.inyanga.legs,
-    feet = gear.blueglenn.brd.artifact.feet,
+    head = gear.globals.brd.empyrean.head,
+    body = gear.globals.brd.empyrean.body,
+    hands= gear.globals.brd.empyrean.hands,
+    legs = gear.globals.inyanga.legs,
+    feet = gear.globals.brd.artifact.feet,
     neck = "Mnbw. Whistle +1",
     ear1 = "Odnowa Earring", -- upgrade to +1 when you can
     ear2 = "Etiolation Earring",
     ring1= "Defending Ring",
     ring2= "Gelatinous Ring +1",
     waist= "Flume Belt +1",
-    back = gear.blueglenn.brd.capes.fast_cast 
+    back = gear.globals.brd.capes.fast_cast 
   }
 
   -- For song defbuffs (duration primary, accuracy secondary)
   sets.midcast.SongEnfeeble =   
   { 
-    head = gear.blueglenn.brd.artifact.head,
-    body = gear.blueglenn.brd.artifact.body,
-    hands= gear.blueglenn.brd.artifact.hands,
-    legs = gear.blueglenn.brd.artifact.legs,
-    feet = gear.blueglenn.brd.artifact.feet,
+    head = gear.globals.brd.artifact.head,
+    body = gear.globals.brd.artifact.body,
+    hands= gear.globals.brd.artifact.hands,
+    legs = gear.globals.brd.artifact.legs,
+    feet = gear.globals.brd.artifact.feet,
     neck = "Mnbw. Whistle +1",
     ear1 = "Hermetic Earring", --"Digni. Earring", need to get
     ear2 = "Enchntr. Earring", --"Regal Earring",  need to get
     ring1= "Stikini Ring +1",
     ring2= "Stikini Ring", 
     waist= "Acuity Belt +1",
-    back = gear.blueglenn.brd.capes.fast_cast, 
+    back = gear.globals.brd.capes.fast_cast, 
   }
 
   -- For Horde Lullaby maxiumum AOE range.
   sets.midcast.Lullaby  = set_combine(
     sets.midcast.SongEnfeeble, {  
-      main  = gear.blueglenn.grioavolr.fast_cast,
+      main  = gear.globals.grioavolr.fast_cast,
       sub   = "Enki Strap",
-      head  = gear.blueglenn.brd.relic.head,
-      body  = gear.blueglenn.brd.empyrean.body, 
-      hands = gear.blueglenn.brd.artifact.hands,
-      legs  = gear.blueglenn.inyanga.legs,
-      feet  = gear.blueglenn.brd.relic.feet,
+      head  = gear.globals.brd.relic.head,
+      body  = gear.globals.brd.empyrean.body, 
+      hands = gear.globals.brd.artifact.hands,
+      legs  = gear.globals.inyanga.legs,
+      feet  = gear.globals.brd.relic.feet,
       ring2 = "Stikini Ring" 
     }
   )
   ---------------------------------
   -- For song defbuffs (accuracy primary, duration secondary)
   ---------------------------------
-  sets.midcast.SongEnfeebleAcc = set_combine(sets.midcast.SongEnfeeble, { legs = gear.blueglenn.brd.artifact.legs })
+  sets.midcast.SongEnfeebleAcc = set_combine(sets.midcast.SongEnfeeble, { legs = gear.globals.brd.artifact.legs })
 
   sets.midcast.SongPlaceholder = sets.midcast.SongEnhancing
 
   sets.midcast.Cure = 
   { 
-    main = gear.blueglenn.grioavolr.conserve_mp,
+    main = gear.globals.grioavolr.conserve_mp,
     sub  = "Giuoco Grip",
     ammo = "Impatiens",
-    head = gear.blueglenn.kaykaus.head,
-    body = gear.blueglenn.kaykaus.body,
-    hands= gear.blueglenn.kaykaus.hands,
-    legs = gear.blueglenn.kaykaus.legs,
-    feet = gear.blueglenn.kaykaus.feet,
+    head = gear.globals.kaykaus.head,
+    body = gear.globals.kaykaus.body,
+    hands= gear.globals.kaykaus.hands,
+    legs = gear.globals.kaykaus.legs,
+    feet = gear.globals.kaykaus.feet,
     neck = "Reti Pendant",
     ear1 = "Calamitous Earring",  
     ear2 = "Gifted Earring",
     ring1= "Lebeche Ring",
     ring2= "Mephitas's Ring +1",
-    back = gear.blueglenn.brd.capes.cure,
+    back = gear.globals.brd.capes.cure,
     waist= "Shinjutsu-no-Obi +1", 
   }
 
@@ -300,11 +307,11 @@ function init_gear_sets()
 
   sets.midcast['Enhancing Magic'] = 
   { 
-    head = gear.blueglenn.inyanga.head,
-    body = gear.blueglenn.inyanga.body,
+    head = gear.globals.inyanga.head,
+    body = gear.globals.inyanga.body,
     hands= "Chironic gloves",
-    legs = gear.blueglenn.ayanmo.legs,
-    feet = gear.blueglenn.kaykaus.feet,
+    legs = gear.globals.ayanmo.legs,
+    feet = gear.globals.kaykaus.feet,
     neck = "Incanter's Torque",
     ear1 = "Mimir Earring",
     ear2 = "Andoaa Earring",
@@ -314,7 +321,10 @@ function init_gear_sets()
     waist= "Embla Sash", 
   }
 
-  sets.midcast.Regen     = set_combine(sets.midcast['Enhancing Magic'], { head = gear.blueglenn.inyanga.head })
+  sets.midcast['Fire Carol'] = { range = "Daurdabla" }
+  sets.midcast['Ice Carol'] = { range = "Daurdabla" }
+
+  sets.midcast.Regen     = set_combine(sets.midcast['Enhancing Magic'], { head = gear.globals.inyanga.head })
   sets.midcast.Haste     = sets.midcast['Enhancing Magic']
   sets.midcast.Stoneskin = set_combine(sets.midcast['Enhancing Magic'], { neck = "Nodens Gorget", waist = "Siegel Sash" })
   sets.midcast.Aquaveil  = set_combine(sets.midcast['Enhancing Magic'], { head = "Chironic Hat",  waist = "Emphatikos Rope" })
@@ -330,28 +340,28 @@ function init_gear_sets()
   -- don't put anything in the ammo slot
   sets.engaged = 
   { 
-    head  = gear.blueglenn.ayanmo.head,
-    body  = gear.blueglenn.ayanmo.body,
-    hands = gear.blueglenn.ayanmo.hands,
-    legs  = gear.blueglenn.ayanmo.legs,
-    feet  = gear.blueglenn.ayanmo.feet,
-    neck  = gear.blueglenn.brd.neck,
+    head  = gear.globals.ayanmo.head,
+    body  = gear.globals.ayanmo.body,
+    hands = gear.globals.ayanmo.hands,
+    legs  = gear.globals.ayanmo.legs,
+    feet  = gear.globals.ayanmo.feet,
+    neck  = gear.globals.brd.neck,
     ear1  = "Telos Earring",
     ear2  = "Dedition Earring",
     ring1 = "Apate Ring",
     ring2 = "Chirich Ring +1",
-    --back = gear.blueglenn.brd.capes.dual_wield,
+    --back = gear.globals.brd.capes.dual_wield,
     waist = "Windbuffet Belt +1", -- better belt is Reiki Yotai, which drops from Kouryu in Escha - Ru'Aun Geas Fete
   } 
 
   -- -53% DT.  I commented out the pieces that overcapped me on DT in favor of STP.
   sets.engaged.DT  = set_combine(
     sets.engaged, {  
-      head  = gear.blueglenn.nyame.head, --7% DT
-      body  = gear.blueglenn.nyame.body, --9% DT
-      hands = gear.blueglenn.nyame.hands, --7% DT
-      legs  = gear.blueglenn.nyame.legs, --8% DT
-      feet  = gear.blueglenn.nyame.feet, --7% DT
+      head  = gear.globals.nyame.head, --7% DT
+      body  = gear.globals.nyame.body, --9% DT
+      hands = gear.globals.nyame.hands, --7% DT
+      legs  = gear.globals.nyame.legs, --8% DT
+      feet  = gear.globals.nyame.feet, --7% DT
       --neck  = "Loricate torque", --5% DT 
       ring1 = "Defending Ring", --10% DT
       --ring2 = "Gelatinous Ring +1", --7% PDT

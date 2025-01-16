@@ -1,21 +1,4 @@
 ---------------------------------
--- organizer items 
----------------------------------
-organizer_items = 
-{
-  copper_voucher="Copper Voucher",
-  forbidden_key="Forbidden Key",
-  macro_orb="Macrocosmic Orb",
-  silver_voucher="Silver Voucher",
-  sushi="Sole Sushi",
-  -- assault things
-  leujaoam_log="Leujaoam Log",
-  mammool_ja_journal="Mamool Ja Journal",
-  lebros_Chronicle="Lebros Chronicle",
-  periqia_diary="Periqia Diary",
-  ilrusi_ledger="Ilrusi Ledger",
-}
----------------------------------
 -- gear 
 ---------------------------------
 -- General Town Sets
@@ -26,7 +9,7 @@ sets.idle.Town["San d'Oria"] = set_combine(sets.idle, { body = "Kingdom Aketon" 
 sets.idle.Town.Adoulin = set_combine(sets.idle, { body = "Councilor's Garb" })
 
 -- Blueglenn Gear Sets
-gear.blueglenn = {
+gear.globals = {
   moonshade = { name = "Moonshade earring", augments = { "Accuracy+4", "TP Bonus +250"} },
   -----------------------------------------------------
   -----                     JSE                   -----
@@ -36,23 +19,32 @@ gear.blueglenn = {
     
     neck = "",
 
-    artifact = {  head  = "Spae. Petasos",
-                  body  = "Spae. Coat",
-                  hands = "Spae. Gloves",
-                  legs  = "Spae. Tonban",
-                  feet  = "Spae. Sabots" },
+    artifact = 
+    {  
+      head  = "Spae. Petasos",
+      body  = "Spae. Coat",
+      hands = "Spae. Gloves",
+      legs  = "Spae. Tonban",
+      feet  = "Spae. Sabots" 
+    },
 
-    relic = {     head  = "Arch. Petasos",
-                  body  = "Arch. Coat",
-                  hands = "Arch. Gloves",
-                  legs  = "Arch. Tonban",
-                  feet  = "Arch. Sabots" },
+    relic = 
+    {     
+      head  = "Arch. Petasos",
+      body  = "Arch. Coat",
+      hands = "Arch. Gloves",
+      legs  = "Arch. Tonban",
+      feet  = "Arch. Sabots" 
+    },
 
-    empyrean = {  head  = "Wicce Petasos",
-                  body  = "Wicce Coat",
-                  hands = "Wicce Gloves",
-                  legs  = "Wicce Chausses",
-                  feet  = "Wicce Sabots" },
+    empyrean = 
+    {  
+      head  = "Wicce Petasos",
+      body  = "Wicce Coat",
+      hands = "Wicce Gloves",
+      legs  = "Wicce Chausses",
+      feet  = "Wicce Sabots" 
+    },
   },
 
   -----------------------------------------------------
@@ -63,7 +55,19 @@ gear.blueglenn = {
     legs = 
     { 
       enfeebling = { name="Chironic Hose", augments = { 'DEX+5', 'AGI+9', 'Damage taken-1%', 'Accuracy+17 Attack+17', 'Mag. Acc.+10 "Mag.Atk.Bns."+10',} } 
-    } 
+    },
+  },
+
+  eschite = 
+  {
+    legs = 
+    {
+      fc = { name="Eschite Cuisses", augments = {'"Mag.Atk.Bns."+25','"Conserve MP"+6','"Fast Cast"+5', }},
+    },
+    feet = 
+    {
+      enmity = { name="Eschite Greaves", augments={'HP+80','Enmity+7','Phys. dmg. taken -4',}},
+    },
   },
 
   grioavolr = 
@@ -77,6 +81,7 @@ gear.blueglenn = {
     head = 
     { 
       mab = { name="Herculean Helm", augments={'"Mag.Atk.Bns."+25','Weapon skill damage +4%','STR+11',}},
+      fc = { name="Herculean Helm", augments={'"Fast Cast"+6','STR+5',}},
     },
     body = 
     { 
@@ -84,11 +89,41 @@ gear.blueglenn = {
     },
     hands= 
     { 
+      ta = { name="Herculean Gloves", augments={'Accuracy+24','"Triple Atk."+4','INT+10','Attack+9',}},
       waltz  = { name="Herculean Gloves", augments={'Accuracy+25 Attack+25','"Waltz" potency +11%','Attack+6',}},
+    },
+    legs = 
+    {
+      fc = { name="Herculean Trousers", augments={'Attack+2','"Fast Cast"+6','"Mag.Atk.Bns."+8',}},
     },
     feet = 
     { 
       ta_att = { name="Herculean Boots", augments={'Attack+30','"Triple Atk."+4','Accuracy+15',}},
+      fc = { name="Herculean Boots", augments={'Mag. Acc.+23','"Fast Cast"+6','MND+3',}},
+    },
+  },
+
+  merlinic = 
+  {
+    body = 
+    {
+      drain_aspir = {{ name="Merlinic Jubbah", augments={'"Drain" and "Aspir" potency +11','CHR+7','"Mag.Atk.Bns."+13',}}}
+    },
+    hands = 
+    {
+      drain_aspir = { name="Merlinic Dastanas", augments={'"Mag.Atk.Bns."+25','"Drain" and "Aspir" potency +11','Mag. Acc.+14',}}
+    },
+    feet = 
+    {
+      fc = { name="Merlinic Crackows", augments={'Mag. Acc.+22 "Mag.Atk.Bns."+22','"Fast Cast"+4','"Mag.Atk.Bns."+11',}}
+    },
+  },
+
+  odyssean = 
+  {
+    feet = 
+    {
+      fc = { name="Odyssean Greaves", augments={'Attack+1','"Fast Cast"+6','Accuracy+1',}},
     },
   },
 
@@ -96,7 +131,15 @@ gear.blueglenn = {
   {   
     legs = 
     { 
-      fc = { name="Psycloth Lappas", augments={'MP+80','Mag. Acc.+15','"Fast Cast"+7',} } 
+      fc = { name="Psycloth Lappas", augments={'MP+80','Mag. Acc.+15','"Fast Cast"+7',}},
+    },
+  },
+
+  rawhide =
+  {
+    hands =
+    {
+      macc = { name="Rawhide Gloves", augments={'Mag. Acc.+15','INT+7','MND+7',}},
     },
   },
 
@@ -196,6 +239,16 @@ gear.blueglenn = {
     feet  = "Flam. Gambieras +2" 
   },
 
+  mallquis = 
+  {
+    head  = "Mall. Chapeau +2",
+    body  = "Mallquis Saio +2",
+    hands = "Mallquis Cuffs +1",
+    legs  = "Mallquis Trews +2",
+    feet  = "Mallquis Clogs +2",
+    ring  = "Mallquis Ring"
+  },
+
   mummu = 
   {       
     head  = "Mummu bonnet +2",
@@ -218,7 +271,7 @@ gear.blueglenn = {
   {    
     body  = "Hiza. haramaki +2",
     legs  = "Hizamaru hizayoroi +2",
-    feet  = "Hizamaru sune-ate +1" 
+    feet  = "Hizamaru sune-ate +2" 
   },
 
   inyanga = 
@@ -256,18 +309,70 @@ gear.blueglenn = {
   -----------------------------------------------------
   -----              Skirmish Gear                -----
   -----------------------------------------------------
-  taeon     = { legs = {  dw = { name = "Taeon Tights", augments = { '"Dual Wield"+4' ,} } }, },
-  telchine  = { head = {  enhancing_duration = { name = "Telchine Cap",   augments = { 'Enh. Mag. eff. dur. +7' ,} } }, 
-                legs = {  enhancing_duration = { name="Telchine Braconi", augments = { 'Enh. Mag. eff. dur. +8', } } }, },
+  taeon = 
+  { 
+    body = {
+      pet = { name="Taeon Tabard", augments={'Pet: Accuracy+22 Pet: Rng. Acc.+22','Pet: "Dbl. Atk."+4','Pet: Damage taken -4%',}},
+    },
+    hands = {
+      pet = { name="Taeon Gloves", augments={'Pet: Accuracy+20 Pet: Rng. Acc.+20','Pet: "Dbl. Atk."+3','Pet: Damage taken -3%',}},
+    },
+    legs = 
+    {  
+      pet = { name="Taeon Tights", augments={'Pet: Attack+22 Pet: Rng.Atk.+22','Pet: "Dbl. Atk."+3','Pet: Damage taken -4%',}},
+    },
+    feet = {
+      pet = { name="Taeon Boots", augments={'Pet: Attack+19 Pet: Rng.Atk.+19','Pet: "Dbl. Atk."+3','Pet: Damage taken -3%',}},
+    },
+  },
+
+  telchine = 
+  { 
+    head = 
+    {  
+      enhancing_duration = { name = "Telchine Cap",   augments = { 'Enh. Mag. eff. dur. +7' ,}}, 
+      hp_cure_pot = { name="Telchine Cap", augments={'"Cure" potency +8%','HP+44',}},
+    },
+    body = 
+    {
+      enhancing_duration = { name="Telchine Chas.", augments={'Enh. Mag. eff. dur. +8',}},
+      cure_regen_pot = { name="Telchine Chas.", augments={'"Cure" potency +7%','"Regen" potency+2',}},
+    },
+    hands = 
+    {
+      enhancing_duration_sird = { name="Telchine Gloves", augments={'Spell interruption rate down -8%','Enh. Mag. eff. dur. +8',}},
+      regen_pot = { name="Telchine Gloves", augments={'"Regen" potency+3',}},
+    },
+    legs = 
+    {  
+      enhancing_duration = { name="Telchine Braconi", augments = { 'Enh. Mag. eff. dur. +8', }},
+      cure_regen_pot = { name="Telchine Braconi", augments={'"Cure" potency +7%','"Regen" potency+3',}},
+    }, 
+    feet = 
+    {
+      enhancing_duration_sird = { name="Telchine Pigaches", augments={'Spell interruption rate down -7%','Enh. Mag. eff. dur. +7',}},
+      regen_pot = { name="Telchine Pigaches", augments={'"Regen" potency+3',}},
+    }
+  },
   -----------------------------------------------------
   -----                     Su3                   -----
   -----------------------------------------------------
+  heyoka = -- BST, PUP
+  {
+    head = "Heyoka Cap +1",
+    body = "Heyoka Harness",
+    hands= "Heyoka Mittens",
+    legs = "Heyoka Subligar",
+    feet = "Heyoka Leggings",
+  },
+
   kendatsuba = -- MNK, SAM, NIN
   {  
-    head  = "Kendatsuba jinpachi +1",
-    body  = "Kendatsuba samue +1", 
-    legs  = "Kendatsuba hakama +1",
-    feet  = "Kendatsuba sune-ate +1" 
+    head  = "Ken. jinpachi +1",
+    body  = "Ken. samue +1", 
+    hands = "Ken. Tekko +1",
+    legs  = "Ken. hakama +1",
+    feet  = "Ken. sune-ate +1" 
   },
 
   oshosi = -- RNG, COR
@@ -281,6 +386,15 @@ gear.blueglenn = {
   -----------------------------------------------------
   -----                   Odyssey                 -----
   -----------------------------------------------------
+  agwu = 
+  {
+    head  = "Agwu's Cap",
+    body  = "Agwu's Robe",
+    hands = "Agwu's Gages",
+    legs  = "Agwu's Slops",
+    feet  = "Agwu's Pigaches"
+  },
+
   gleti = 
   {       
     head  = "Gleti's Mask",
@@ -317,35 +431,3 @@ gear.blueglenn = {
     feet  = "Sakpata's Leggings" 
   },
 }
-
--- ---------------------------------
--- -- macros 
--- ---------------------------------
--- function set_macros(book, sheet)
---   if book then
---     send_command('@input /macro book ' .. tostring(book) .. ';wait .1;input /macro set ' .. tostring(sheet))
---     return
---   end
---   send_command('@input / macro set ' .. tostring(sheet))
--- end
-
--- ---------------------------------
--- -- lockstyle 
--- ---------------------------------
--- function set_lockstyle(page)
---   send_command('@wait 6;input /lockstyleset ' .. tostring(page))
--- end
--- ---------------------------------
--- -- dressup 
--- ---------------------------------
--- function dressup(race, gender, face)
---   send_command('@input //lua l dressup')
---   if not race or not gender or not face then send_command('@input //du clear self') return end
---   send_command('@input //du self race ' .. race .. ' ' .. gender)
---   send_command('@wait 2; input //du self face ' .. tostring(face))
--- end
-
--- ---------------------------------
--- -- organizer 
--- ---------------------------------
--- send_command('@input //gs org;wait6; input //gs validate')

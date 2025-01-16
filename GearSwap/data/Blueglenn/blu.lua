@@ -5,7 +5,6 @@ function get_sets()
   -- Load and initialize the include file.
   mote_include_version = 2
   include('Mote-Include.lua')
-  include('organizer-lib')
 end
 
 ---------------------------------
@@ -29,20 +28,30 @@ end
 set_macros(1, 8)
 
 ---------------------------------
--- dressup 
+-- dislpay globals
 ---------------------------------
-function dressup(race, gender, face)
-  send_command('@input //lua l dressup')
-  if not race or not gender or not face then send_command('@input //du clear self') return end
-  send_command('@input //du self race ' .. race .. ' ' .. gender)
-  send_command('@wait 2; input //du self face ' .. tostring(face))
-end
-dressup()
-
----------------------------------
--- organizer 
----------------------------------
-send_command('@input //gs org;wait6; input //gs validate')
+displaySettings = 
+{ 
+  pos = 
+  {
+    x = 0,
+    y = 0
+  },
+  text = 
+  {
+    font = 'Consolas',
+    size = 10
+  },
+  bg = 
+  {
+    alpha = 255
+  },
+  flags = 
+  {
+    draggable = false
+  }
+}
+displayBox = texts.new('${value}', displaySettings)
 
 ---------------------------------
 -- job setup
@@ -59,46 +68,59 @@ function user_setup()
   ---------------------------------
   -- states
   ---------------------------------
+  -- built-in state tables
   state.IdleMode:options('Normal', 'Evasion Tanking')
   send_command('bind ^i gs c cycle IdleMode')
 
-  state.OffenseMode:options('Clubs', 'Swords', 'FeedTp', 'Learn')
+  state.OffenseMode:options('Normal')
   send_command('bind ^o gs c cycle OffenseMode')
 
+  state.CastingMode:options('Normal', 'Force Clubs', 'Golden Entomb')
+  send_command('bind ^c gs c cycle CastingMode')
+
+  -- custom state tables
+  state.AutoUnbridled = M{ 'false', 'true' }
+  send_command('bind ^u gs c cycle AutoUnbridled')
+
+  state.DisplayMode = M{ 'true', 'false'}
+
+  drawDisplay() -- make sure this is directly after any state declarations
   ---------------------------------
   -- jse setup
   ---------------------------------
-  gear.blueglenn.blu = 
+  gear.globals.blu = 
   {
     capes = 
     { 
       dex_crit= { name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','Crit.hit rate+10',}},
       str_att = { name="Rosmerta's Cape", augments={'STR+20','Accuracy+20 Attack+20','STR+10','Weapon skill damage +10%','Phys. dmg. taken-10%',}},
-      int_mab = { name="Rosmerta's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Fast Cast"+10','Phys. dmg. taken-10%',}}, 
-      agi_eva_fc = { name="Rosmerta's Cape", augments={ }} --Agi 20 | Eva 25 | Fast Cast 10 | 20 EVA MEVA
+      int_mab_sird = { name="Rosmerta's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','Mag. Acc.+10','"Mag.Atk.Bns."+10','Spell interruption rate down-10%',}},
+      agi_eva_fc = { name="Rosmerta's Cape", augments={'AGI+20','Eva.+20 /Mag. Eva.+20','INT+10','"Fast Cast"+10','Spell interruption rate down-10%',}},
     },
 
     neck = "Mirage Stole +1",
 
     artifact = 
     {  
+      head  = "Assim. Keffiyeh +3",
       hands = "Assim. Bazu. +1",
-      body  = "Assim. Jubbah +2",
-      legs  = "Assim. Shalwar +1" 
+      body  = "Assim. Jubbah +3",
+      legs  = "Assim. Shalwar +3" 
     },
 
     relic = 
     {  
       head  = "Luh. Keffiyeh +3",
       body  = "Luhlaza Jubbah +3",
-      hands = "Luh. Bazubands +1",
+      hands = "Luh. Bazubands +3",
       legs  = "Luhlaza Shalwar +3",
       feet  = "Luhlaza Charuqs +3", 
     },
 
     empyrean = 
     {  
-      body  = "Hashishin Mintan",
+      head  = "Hashishin Kavuk +2",
+      body  = "Hashishin Mintan +2",
       hands = "Hashishin Bazubands +1",
       legs  = "Hashishin Tayt +1",
       feet  = "Hashishin Basmak +1", 
@@ -113,30 +135,14 @@ function user_unload()
   -- unload keybinds
   send_command('unbind ^i') -- unbinds IdleMode from i key
   send_command('unbind ^o') -- unbinds EngagedMode from o key
+  send_command('unbind ^c') -- unbinds CastingMode from c key
+  send_command('unbind ^u') -- unbinds AutoUnbridled from u key
 end
 
 ---------------------------------
 -- define gear sets
 ---------------------------------
 function init_gear_sets()
-  -- this is the order.  the order is arbitrary, but you should try to keep it consistent
-    -- main
-    -- sub
-    -- range
-    -- ammo
-    -- head
-    -- body
-    -- hands
-    -- legs
-    -- feet
-    -- neck 
-    -- waist
-    -- ear1
-    -- ear2
-    -- ring1
-    -- ring2
-    -- back
-
   ---------------------------------
   -- idle
   ---------------------------------
@@ -144,38 +150,38 @@ function init_gear_sets()
   { 
     ammo  = "Staunch Tathlum",
     head  = { name="Rawhide Mask", augments={'HP+50','Accuracy+15','Evasion+20',}},
-    body  = gear.blueglenn.jhakri.body,
-    hands = gear.blueglenn.nyame.hands,
-    legs  = gear.blueglenn.carmine.legs,
-    feet  = gear.blueglenn.nyame.feet,
+    body  = gear.globals.blu.empyrean.body,
+    hands = gear.globals.nyame.hands,
+    legs  = gear.globals.carmine.legs,
+    feet  = gear.globals.nyame.feet,
     neck  = "Bathy Choker +1",
     waist = "Flume Belt",
     ear1  = "Genmei Earring",
     ear2  = "Infused Earring",
     ring1 = "Defending Ring",
-    ring2 = "Gelatinous Ring +1",
+    ring2 = "Shneddick Ring",
     back  = "Moonbeam Cape", 
   }
   sets.idle.dt =  set_combine(sets.idle, 
   {
-    head = gear.blueglenn.nyame.head,
-    body = gear.blueglenn.nyame.body,
+    head = gear.globals.nyame.head,
+    body = gear.globals.nyame.body,
   })
   sets.idle['Evasion Tanking'] = set_combine(sets.idle, 
   {                                           --| EVA | MEVA | DT |
     ammo = "Amar Cluster",                    --|  10 |    0 |  0 |
-    head = gear.blueglenn.nyame.head,         --|  91 |  123 |  7 |
-    body = gear.blueglenn.nyame.body,         --| 102 |  139 |  9 |
-    hands= gear.blueglenn.nyame.hands,        --|  80 |  112 |  7 |
-    legs = gear.blueglenn.nyame.legs,         --|  85 |  150 |  8 |
-    feet = gear.blueglenn.nyame.feet,         --| 119 |  150 |  7 |
+    head = gear.globals.nyame.head,           --|  91 |  123 |  7 |
+    body = gear.globals.nyame.body,           --| 102 |  139 |  9 |
+    hands= gear.globals.nyame.hands,          --|  80 |  112 |  7 |
+    legs = gear.globals.nyame.legs,           --|  85 |  150 |  8 |
+    feet = gear.globals.nyame.feet,           --| 119 |  150 |  7 |
     neck = "Bathy Choker +1",                 --|  15 |    0 |  0 |
     waist= "Carrier's Sash",                  --|   0 |    0 |  0 |
     ear1 = "Eabani Earring",                  --|  15 |    8 |  0 |
     ear2 = "Infused Earring",                 --|  10 |    0 |  0 |
     ring1= "Defending Ring",                  --|   0 |    0 | 10 |
     ring2= "Gelatinous Ring +1",              --|   0 |    0 |  7 |
-    back = gear.blueglenn.blu.capes.agi_eva_fc--|  25 |   20 |  0 |
+    back = gear.globals.blu.capes.agi_eva_fc  --|  25 |   20 |  0 |
   })                                          --| 552 |  694 | 55 |
 
   ---------------------------------
@@ -183,25 +189,21 @@ function init_gear_sets()
   ---------------------------------
   sets.engaged = 
   {  
-    ammo  = "Aurgelmir Orb",
-    head  = gear.blueglenn.adhemar.head,
-    body  = gear.blueglenn.gleti.body,
-    hands = gear.blueglenn.adhemar.hands,
-    legs  = gear.blueglenn.gleti.legs,
-    feet  = gear.blueglenn.gleti.feet,
-    neck  = gear.blueglenn.blu.neck,
-    waist = "Windbuffet Belt +1",
-    ear1  = "Telos Earring",
-    ear2  = "Cessance Earring",
+    ammo  = "Coiste Bodhar",
+    head  = gear.globals.adhemar.head,
+    body  = gear.globals.adhemar.body,
+    hands = "Malignance Gloves",
+    legs  = "Samnuha Tights",
+    feet  = gear.globals.herculean.feet.ta_att,
+    neck  = gear.globals.blu.neck,
+    waist = "Reiki Yotai",
+    ear1  = "Dedition Earring",
+    ear2  = "Suppanomimi",
     ring1 = "Epona's Ring",
     ring2 = "Chirich Ring +1",
-    back  = gear.blueglenn.blu.capes.dex_crit, 
+    back  = gear.globals.blu.capes.dex_crit, 
   }
 
-  sets.engaged.Clubs  = set_combine(sets.engaged, { main = "Maxentius", sub = "Kaja Rod", })
-  sets.engaged.Swords = set_combine(sets.engaged, { main = "Naegling",  sub = "Thibron", })
-  sets.engaged.FeedTp = set_combine(sets.engaged, { main = "Nihility", sub = "Wind Knife", })
-  sets.engaged.Learn  = set_combine(sets.engaged.Swords, { hands = gear.blueglenn.blu.artifact.hands })
   ---------------------------------
   -- Weapon Skills
   ---------------------------------
@@ -209,74 +211,79 @@ function init_gear_sets()
   sets.precast.WS = 
   {
     ammo = "Aurgelmmir Orb",
-    head = "Sukeroku Hachi.",
-    body = gear.blueglenn.blu.artifact.body,
-    legs = gear.blueglenn.blu.relic.legs,
+    head = gear.globals.blu.empyrean.head,
+    body = gear.globals.blu.artifact.body,
+    legs = gear.globals.blu.relic.legs,
     neck = "Fotia Gorget",
     waist= "Fotia Belt",
-    ear2 = gear.blueglenn.moonshade,
-    back = gear.blueglenn.blu.capes.str_att,
+    ring1= "Epaminondas's Ring",
+    ear1 = "Ishvara Earring",
+    ear2 = gear.globals.moonshade,
+    back = gear.globals.blu.capes.str_att,
   }
   -- Savage Blade: Sword - Physical - 50% STR / 50% MND - Dynamic fTP: 4.0 / 10.25 / 13.75
   sets.precast.WS["Savage Blade"] = set_combine(sets.precast.WS, 
   { 
-    head = gear.blueglenn.jhakri.head,
-    body = gear.blueglenn.gleti.body,
-    hands= gear.blueglenn.jhakri.hands,
-    legs = gear.blueglenn.gleti.legs,
-    feet = gear.blueglenn.jhakri.feet,
-    neck = gear.blueglenn.blu.neck,
-    ear1 = "Telos Earring",
-    waist= "Prosilio Belt +1"
+    body = gear.globals.gleti.body,
+    hands= gear.globals.jhakri.hands,
+    legs = gear.globals.gleti.legs,
+    feet = gear.globals.jhakri.feet,
+    neck = gear.globals.blu.neck,
+    ear1 = "Ishvara Earring",
+    waist= "Sailfi Belt +1"
   })
   -- Expiacion: Sword - Physical - 30% STR / 30% INT / 20% DEX - Dynamic fTP: 3.8 / 9.4 / 12.2
-  sets.precast.WS["Expiacion"] = sets.precast.WS["Savage Blade"]
+  sets.precast.WS["Expiacion"] = set_combine(sets.precast.WS["Savage Blade"], {
+    ammo = "Oshasha's treatise",
+    body = gear.globals.blu.artifact.body,
+    legs = gear.globals.blu.relic.legs
+  })
   -- Chant du Cygne: Sword - Physical - 80% DEX - Static fTP @ 1.63 - Crit Rate @ 1k/2k/3k = 15%/25%/40%
   sets.precast.WS['Chant du Cygne'] = set_combine(sets.precast.WS, 
   {
-    head = gear.blueglenn.adhemar.head,
-    body = gear.blueglenn.gleti.body,
-    hands= gear.blueglenn.adhemar.hands,
-    legs = gear.blueglenn.gleti.legs,
-    feet = gear.blueglenn.gleti.feet,
-    neck = gear.blueglenn.blu.neck,
+    head = gear.globals.adhemar.head,
+    body = gear.globals.gleti.body,
+    hands= gear.globals.adhemar.hands,
+    legs = gear.globals.gleti.legs,
+    feet = gear.globals.gleti.feet,
+    neck = gear.globals.blu.neck,
     ear1 = "Mache Earring +1",
     ring1= "Epona's Ring",
     ring2= "Ilabrat Ring",
-    back = gear.blueglenn.blu.capes.dex_crit,
+    back = gear.globals.blu.capes.dex_crit,
   })
   -- Requeiescat: Sword - Physical - 73~85% MNK - Static fTP @ 1.0 - Attack Power @ 1k/2k/3k = -20%/-10%/-0%
   sets.precast.WS['Requeiescat'] = set_combine(sets.precast.WS, 
   {
-    head = gear.blueglenn.blu.relic.head,
-    body = gear.blueglenn.blu.relic.body,
-    hands= gear.blueglenn.blu.relic.hands,
-    legs = gear.blueglenn.gleti.legs,
-    feet = gear.blueglenn.blu.relic.feet,
-    ear1 = "Sherida earring",
+    head = gear.globals.blu.relic.head,
+    body = gear.globals.blu.relic.body,
+    hands= gear.globals.blu.relic.hands,
+    legs = gear.globals.gleti.legs,
+    feet = gear.globals.blu.relic.feet,
+    ear1 = "Brutal earring",
     ring1= "Epona's Ring",
   })
   -- Sangine Blade: Sword - Magical (Dark) - 50% MND / 30% STR - Static fTP @ 2.75 - HP Drained @ 1k/2k/3k = 50%/100%/160%
   sets.precast.WS["Sanguine Blade"] = set_combine(sets.precast.WS, 
   {
     head = "Pixie Hairpin +1",
-    body = gear.blueglenn.amalric.body,
-    hands= gear.blueglenn.jhakri.hands,
-    feet = gear.blueglenn.jhakri.feet, -- todo: amalric nails +1
+    body = gear.globals.amalric.body,
+    hands= gear.globals.jhakri.hands,
+    feet = gear.globals.jhakri.feet, -- todo: amalric nails +1
     neck = "Sanctity Necklace",
     ear1 = "Firomisi Earring",
     ear2 = "Novio Earring",
     ring1= "Archon Ring",
     ring2= "Shiva Ring +1",
-    back = gear.blueglenn.blu.capes.int_mab
+    back = gear.globals.blu.capes.agi_eva_fc
   })
   -- Vorpal Blade: Sword - Physical - 60% STR - Static fTP @ 1.375 - Crit chance vaires with TP (bg-wiki doesn't have values)
   sets.precast.WS["Vorpal Blade"] = set_combine(sets.precast.WS, 
   {
-    head = gear.blueglenn.gleti.head,
-    body = gear.blueglenn.gleti.body,
-    hands= gear.blueglenn.gleti.hands,
-    feet = gear.blueglenn.gleti.feet,
+    head = gear.globals.gleti.head,
+    body = gear.globals.gleti.body,
+    hands= gear.globals.gleti.hands,
+    feet = gear.globals.gleti.feet,
     ear1 = "Sherida Earring",
     ring1= "Epona's Ring",
     ring2= "Ilabrat Ring",
@@ -284,38 +291,37 @@ function init_gear_sets()
   ---------------------------------
   -- Job Abilities
   ---------------------------------
-  sets.precast.JA['Diffusion'] = { feet = gear.blueglenn.blu.relic.feet, }
+  sets.precast.JA['Diffusion'] = { feet = gear.globals.blu.relic.feet, }
   ---------------------------------
   -- Spells
   ---------------------------------
   -- precast
   sets.precast.FC = 
-  {                                           --| FC | 80% is cap
+  {                                           --| FC |  -- you get 20% by just setting erratic flutter
     ammo  = "Sapience Orb",                   --|  2 |
-    head  = gear.blueglenn.carmine.head,      --| 14 |
-    body  = gear.blueglenn.blu.empyrean.body, --| 13 | (blue magic only)
-    hands = gear.blueglenn.adhemar.hands,     --|  0 | no FC, but 5 haste
-    legs  = gear.blueglenn.psycloth.legs.fc,  --|  7 |
-    feet  = gear.blueglenn.carmine.feet,      --|  8 |
-    neck  = "Stoicheion Medal",               --|  3 | (elemental magic only)
+    head  = gear.globals.carmine.head,        --| 14 |
+    body  = gear.globals.nyame.body,          --|    |
+    hands = "Leyline Gloves",                 --|  6 | -- 5 base + 1 from augment
+    legs  = gear.globals.psycloth.legs.fc,    --|  7 |
+    feet  = gear.globals.carmine.feet,        --|  8 |
+    neck  = "Voltsurge Torque",               --|  4 |
     waist = "Witful Belt",                    --|  3 |
     ear1  = "Loquac. Earring",                --|  2 |
     ear2  = "Enchntr. Earring +1",            --|  2 |
-    ring1 = "Defending Ring",                 --|  0 |
-    ring2 = "Prolix Ring",                    --|  2 |
-    back  = gear.blueglenn.blu.capes.int_mab, --| 10 |
-  }                                           --| 66 |
+    ring1 = "Defending Ring",                 --|    |
+    ring2 = "Gelatinous Ring +1",             --|    |
+    back  = gear.globals.blu.capes.agi_eva_fc,--| 10 |
+  }                                           --| 78 | -- 20% from setting erratic flutter -- 80% is cap
 
-  -- strap in, the blue magic midcast section gets... complicated.
   -- try to keep these in the same order as the load_blue_magic_table function below.  For readability's sake
-  sets.midcast['Blue Magic'] = 
+  sets.midcast.blue = 
   { 
     ammo  = "Mavi Tathlum",
-    head  = gear.blueglenn.jhakri.head,
-    body  = gear.blueglenn.amalric.body,
-    hands = gear.blueglenn.amalric.hands,
-    legs  = gear.blueglenn.jhakri.legs,
-    feet  = gear.blueglenn.jhakri.feet,
+    head  = gear.globals.jhakri.head,
+    body  = gear.globals.amalric.body,
+    hands = gear.globals.amalric.hands,
+    legs  = gear.globals.jhakri.legs,
+    feet  = gear.globals.jhakri.feet,
     neck  = "Sanctity Necklace",
     waist = "Eschan Stone",
     ear1  = "Novio Earring",
@@ -325,98 +331,142 @@ function init_gear_sets()
     back  = "Cornflower Cape", 
   }
   -- all phys spells need to prioritize some amount of strength
-  sets.midcast['Blue Magic'].phys = set_combine(sets.midcast['Blue Magic'], 
-  {
-    head = gear.blueglenn.blu.relic.head,
-    body = gear.blueglenn.blu.relic.body,
-    hands= gear.blueglenn.jhakri.hands,
-    legs = gear.blueglenn.jhakri.legs,
-    feet = gear.blueglenn.blu.relic.feet,
-    neck = gear.blueglenn.blu.neck,
-    waist= "Prosilio Belt +1",
-    ear1 = "Telos Earring",
-    ear2 = "Tati Earring",
-    back = gear.blueglenn.blu.capes.str_att,
-  })
-  sets.midcast['Blue Magic'].phys_acc = set_combine(sets.midcast['Blue Magic'].phys, { })
-  sets.midcast['Blue Magic'].str      = set_combine(sets.midcast['Blue Magic'].phys, { })
-  sets.midcast['Blue Magic'].dex      = set_combine(sets.midcast['Blue Magic'].phys, { })
-  sets.midcast['Blue Magic'].vit      = set_combine(sets.midcast['Blue Magic'].phys, { })
-  sets.midcast['Blue Magic'].agi      = set_combine(sets.midcast['Blue Magic'].phys, { })
-  sets.midcast['Blue Magic'].phys_int = set_combine(sets.midcast['Blue Magic'].phys, { })
-  sets.midcast['Blue Magic'].phys_mnd = set_combine(sets.midcast['Blue Magic'].phys, { })
-  sets.midcast['Blue Magic'].phys_chr = set_combine(sets.midcast['Blue Magic'].phys, { })
-  sets.midcast['Blue Magic'].hp       = set_combine(sets.midcast['Blue Magic'].phys, { })
+  sets.midcast.blue.phys = set_combine(sets.midcast.blue, 
+  {                                         -- | STR | Att |
+    ammo = "Aurgelmir Orb",                 -- |   7 |  10 |
+    head = gear.globals.blu.relic.head,     -- |  30 |  62 |
+    body = gear.globals.blu.relic.body,     -- |  37 |  86 |
+    hands= gear.globals.blu.relic.hands,    -- |  21 |  63 |
+    legs = gear.globals.jhakri.legs,        -- |  47 |  45 |
+    feet = gear.globals.blu.relic.feet,     -- |  22 |  86 |
+    neck = gear.globals.blu.neck,
+    waist= "Prosilio Belt +1",              -- |     |  28 |
+    ear1 = "Telos Earring",                 -- |     |  10 |
+    ear2 = "Tati Earring",                  -- |     |  15 |
+    ring1= "Ifrit Ring",                    -- |   8 |     |
+    ring2= "Apate Ring",                    -- |   6 |     |
+    back = gear.globals.blu.capes.str_att,  -- |  30 |  20 |
+  })                                        -- | 208 | 425 |
   -- all mag spells need to prioritize some amount of int
-  sets.midcast['Blue Magic'].mab = set_combine(sets.midcast['Blue Magic'], 
-  {                                                                     --| MAB |
-    main = "Maxentius",--|  21 |
-    sub  = "Kaja Rod", -- Bunzi's Rod--|  18 |
-    ammo = "Mavi Tathlum", -- Pemphredo Tathlum--|  21 |
-    head = "", -- empty because cohort cloak--|   0 |
-    body = "Cohort Cloak +1",--| 100 |
-    hands= gear.blueglenn.amalric.hands,--|  21 |
-    legs = gear.blueglenn.blu.relic.legs,--|  21 |
-    feet = gear.blueglenn.jhakri.feet, -- gear.blueglenn.amalric.feet,--|  21 |
-    neck = "Sanctity Necklace",--|  21 |
-    waist= "Eschan Stone",  -- Orpheus's Sash--|  21 |
-    ear1 = "Novio Earring", -- Regal Earring--|  21 |
-    ear2 = "Friomisi Earring",--|  21 |
-    ring1= "Shiva Ring +1",--|  21 |
-    ring2= "Acumen Ring",--|  21 |
-    back = gear.blueglenn.blu.capes.int_mab,--|  21 |
-  })
-  sets.midcast['Blue Magic'].mag_int  = set_combine(sets.midcast['Blue Magic'].mab, { })
-  sets.midcast['Blue Magic'].mag_dark = set_combine(sets.midcast['Blue Magic'].mab, 
+  sets.midcast.blue.mab = set_combine(sets.midcast.blue, 
+  {                                             --| MAB |
+    --main = "Maxentius",                       --|  21 |
+    --sub  = "Kaja Rod",                        --|  18 |  "Bunzi's Rod", --|  35 |
+    ammo = "Mavi Tathlum", -- Pemphredo Tathlum
+    head = "", -- empty because cohort cloak
+    body = "Cohort Cloak +1",                    --| 100 |
+    hands= gear.globals.amalric.hands,         --|  53 |
+    legs = gear.globals.blu.relic.legs,        --|  57 |
+    feet = gear.globals.jhakri.feet,           --|  39 |  gear.globals.amalric.feet,--|  52 |
+    neck = "Sanctity Necklace",                  --|  10 |  "Baetyl Pendant", --|  13 |
+    waist= "Eschan Stone",                       --|   7 |  "Orpheus's Sash", --|   ? |
+    ear1 = "Novio Earring",                      --|   7 |  "Regal Earring", --|   7 |
+    ear2 = "Friomisi Earring",                   --|  10 |
+    ring1= "Shiva Ring +1",                      --|   3 |
+    ring2= "Acumen Ring",                        --|   4 |
+    back = gear.globals.blu.capes.int_mab_sird,--|  10 |
+  })                                             --| 339 |
+  sets.midcast.blue.mag_dark = set_combine(sets.midcast.blue.mab, 
   {                                          -- DARK: | MAB | SKILL | MACC |
     head ="Pixie Hairpin +1",                       --|  28 |     0 |    0 |
-    body = gear.blueglenn.amalric.body,             --|   0 |    20 |    0 |
+    body = gear.globals.amalric.body,               --|   0 |    20 |    0 |
     ring1= "Archon Ring",                           --|   5 |     0 |    5 |
     ring2= "Evanescence Ring",                      --|   0 |    10 |    0 |
   })                                                --|  33 |    30 |    5 |
-  sets.midcast['Blue Magic'].mag_light= set_combine(sets.midcast['Blue Magic'].mab, { })
-  sets.midcast['Blue Magic'].mag_mnd  = set_combine(sets.midcast['Blue Magic'], { })
-  sets.midcast['Blue Magic'].mag_chr  = set_combine(sets.midcast['Blue Magic'], { })
-  sets.midcast['Blue Magic'].mag_vit  = set_combine(sets.midcast['Blue Magic'], { })
-  sets.midcast['Blue Magic'].mag_dex  = set_combine(sets.midcast['Blue Magic'], { })
-  sets.midcast['Blue Magic'].mag_acc  = set_combine(sets.midcast['Blue Magic'], 
+  sets.midcast.blue.mag_acc  = set_combine(sets.midcast.blue, 
   {                                                 --| MACC |
     ammo = "Hydrocera",                             --|    6 |
-    --head = gear.blueglenn.jhakri.head,              --|   44 |
-    body = "Cohort Cloak +1",                       --|  100 |
-    hands= gear.blueglenn.ayanmo.hands,             --|   43 |
-    legs = gear.blueglenn.jhakri.legs,              --|   45 |
-    feet = gear.blueglenn.jhakri.feet,              --|   42 |
-    neck = gear.blueglenn.blu.neck,                 --|   20 |
+    head = gear.globals.blu.artifact.head,        --|   46 |
+    body = gear.globals.amalric.body,             --|   53 |
+    hands= gear.globals.ayanmo.hands,             --|   43 |
+    legs = gear.globals.blu.artifact.legs,        --|   39 |
+    feet = gear.globals.jhakri.feet,              --|   42 |
+    neck = gear.globals.blu.neck,                 --|   20 |
     waist= "Eschan Stone",                          --|    7 |
     ear1 = "Crep. Earring",                         --|   10 |
     ear2 = "Hermetic Earring",                      --|    7 |
     ring1= "Stikini Ring +1",                       --|   11 |
     ring2= "Stikini Ring",                          --|    8 |
-    back = gear.blueglenn.blu.capes.int_mab         --|   20 |
-  })                                                --|  319 |
-  sets.midcast['Blue Magic'].unbridled_spells = set_combine(sets.midcast['Blue Magic'].mag_acc, { })
-  -- aaaaaaaaaand the rest
-  sets.midcast['Blue Magic'].breath   = set_combine(sets.midcast['Blue Magic'], { })
-  sets.midcast['Blue Magic'].phys_stun= set_combine(sets.midcast['Blue Magic'], { })
-  sets.midcast['Blue Magic'].mag_stun = set_combine(sets.midcast['Blue Magic'], { })
-  sets.midcast['Blue Magic'].heal     = set_combine(sets.midcast['Blue Magic'], { })
-  sets.midcast['Blue Magic'].blu_skill= set_combine(sets.midcast['Blue Magic'],
-  {                                                 --| SKILL |
+    back = gear.globals.blu.capes.int_mab_sird    --|   30 |
+  })                                                --|  322 |
+  sets.midcast.blue.additional_effect = set_combine(sets.midcast.blue.mag_acc, {
+    ammo = "Falcon Eye", 
+    head = gear.globals.carmine.head,
+    body = gear.globals.jhakri.body,
+    hands= gear.globals.jhakri.hands,
+    legs = gear.globals.jhakri.legs,
+    feet = gear.globals.blu.relic.feet
+  })
+  sets.midcast.blue.heal = set_combine(sets.midcast.blue, 
+  {                                                   -- |  HP | Pot |
+    head = gear.globals.telchine.head.hp_cure_pot,  -- |  44 |   8 |
+    body = gear.globals.telchine.body.hp_cure_pot,  -- |  44 |   7 |
+    hands= gear.globals.telchine.hands.enhancing_duration_sird,     -- |  40 |     |
+    legs = gear.globals.telchine.legs.hp_cure_pot,  -- |  45 |   7 |
+    feet = gear.globals.telchine.feet.enhancing_duration_sird,      -- |  35 |     |
+    neck = "Unmoving Collar +1",                      -- | 200 |     |
+    ring2= "Gelatinous Ring +1",                      -- | 100 |     |
+    ear2 = "Odnowa Earring +1",                       -- | 110 |     |
+    back = "Moonbeam Cape"                            -- | 250 |     |
+  })                                                  -- | 868 |  22 |
+  sets.midcast.blue.heal_self = set_combine(sets.midcast.blue.heal, 
+  { 
+
+  })
+  sets.midcast.blue.blu_skill = set_combine(sets.midcast.blue,
+  {                                                 --| SKILL | -- a mastered blue mage has 460 skill, + 1 skill per master level, 600 is the cap
     ammo = "Mavi Tathlum",                          --|     5 | 
-    head = gear.blueglenn.blu.relic.head,           --|    17 |
-    body = gear.blueglenn.blu.artifact.body,        --|    20 |
+    head = gear.globals.blu.relic.head,           --|    17 |
+    body = gear.globals.blu.artifact.body,        --|    20 |
     hands= "Rawhide Gloves",                        --|    10 |
-    legs = gear.blueglenn.blu.empyrean.legs,        --|    23 |
-    feet = gear.blueglenn.blu.relic.feet,           --|    12 |
-    neck = gear.blueglenn.blu.neck,                 --|    15 |
+    legs = gear.globals.blu.empyrean.legs,        --|    23 |
+    feet = gear.globals.blu.relic.feet,           --|    12 |
+    neck = gear.globals.blu.neck,                 --|    15 |
     ear2 = "Njordr Earring",                        --|    10 |
     ring1= "Stikini Ring +1",                       --|     8 |
     ring2= "Stikini Ring",                          --|     5 |
-    back = gear.blueglenn.blu.capes.agi_eva_fc      --|     0 |
+    back = gear.globals.blu.capes.agi_eva_fc      --|     0 |
   })                                                --|   125 |
-  sets.midcast['Blue Magic'].buff     = set_combine(sets.midcast['Blue Magic'], { })
-  sets.midcast['Blue Magic'].refresh  = set_combine(sets.midcast['Blue Magic'], { })
+  sets.midcast.blue.sird = set_combine(sets.midcast.blue,  
+  {                                                 -- | SIRD |
+    ammo = "Staunch tathlum",                       -- |   10 |
+    hands= gear.globals.telchine.hands.enhancing_duration_sird,   -- |    8 |
+    legs = gear.globals.blu.artifact.legs,        -- |   22 |
+    feet = gear.globals.telchine.feet.enhancing_duration_sird,    -- |    7 |
+    waist= "Rumination Sash",                       -- |   10 |
+    ear1 = "Halasz Earring",                        -- |    5 |
+    ear2 = "Magnetic Earring",                      -- |    8 |
+    ring2= "Evanescence Ring",                      -- |    5 |
+    back = gear.globals.blu.capes.int_mab_sird    -- |   10 |
+  })                                                -- |   85 | -- cap is 102
+
+  sets.midcast.blue.goldenEntomb = set_combine(sets.midcast.blue, 
+  {
+    ammo  = "Per. Lucky Egg", -- TH+1
+    head  = "Wh. Rarab Cap +1", -- TH+1
+  })
+end
+
+---------------------------------
+-- display stuff
+---------------------------------
+function drawDisplay()
+  if (state.DisplayMode.value == 'false') then
+    displayBox:hide()
+    return
+  end
+
+  local INDENT = ' ':rep(3)
+  local displayLines = L{}
+
+  displayLines:append('[I]dle: '..state.IdleMode.value)
+  displayLines:append('[O]ffense: '..state.OffenseMode.value)
+  displayLines:append('[C]asting: '..state.CastingMode.value)
+  displayLines:append('Auto [U]nbridled: '..state.AutoUnbridled.value)
+
+  --displayBox:text(displayLines:concat('\\cr\n'))
+  displayBox:text(displayLines:concat(' | '))
+  displayBox:show()
 end
 
 ---------------------------------
@@ -434,23 +484,40 @@ function job_buff_change(buff, gain)
 
 end 
 
+function job_precast(spell, action, spellMap, eventArgs)
+  autoUnbridled(spell, true)
+end
+
 function job_midcast(spell, action, spellMap, eventArgs)
+  -- golden entomb
+  if spell.name == 'Entomb' and state.CastingMode.value == 'Golden Entomb' then
+    equip(sets.midcast.blue.goldenEntomb)
+    return
+  end
+
+  -- otherwise
   if spell.type == 'BlueMagic' then
     local setName = getBlueMagicSet(spell.english)
     if setName ~= '' then 
-      local fullPath = sets.midcast['Blue Magic'][setName]
+      local fullPath = sets.midcast.blue[setName]
       if fullPath == nil then 
         windower.add_to_chat(028, 'WARNING: Blue Magic set: ' .. setName .. ' was not found!')
+        equip(sets.midcast.blue)
         return
       end
-      windower.add_to_chat(069, '<-- '..spell.english..' | '..setName..' -->')
+      -- Inform the user 
+      --windower.add_to_chat(069, '<-- '..spell.english..' | '..setName..' -->')
+      -- If Force Clubs then equip clubs on cast of mab or mab_dark
+      if (state.CastingMode.value == 'Force Clubs' and (setName == 'mab' or setName == 'mab_dark')) then
+        equip({ main = "Maxentius", sub = "Kaja Rod" })
+      end
+      -- Finally, equip the full path on top
       equip(fullPath)
     end
   end
 end
 
 function job_aftercast(spell, action)
-  windower.add_to_chat(028, spell.english)
   if spell.english:lower() == 'fantod' and not spell.interrupted then
     incrementFantodCounter(1)
   end
@@ -458,14 +525,72 @@ end
 
 function job_state_change(field, newValue, oldValue)
   -- EngagedMode changed
-  if state.OffenseMode:contains(newValue) and newValue ~= oldValue then
-    equip(sets.engaged[newValue])
-  end
+  --if state.OffenseMode:contains(newValue) and newValue ~= oldValue then
+    --equip(sets.engaged[newValue])
+  --end
+end
+
+function job_state_change(field, newValue, oldValue)
+  -- any mode changed
+  drawDisplay()
 end
 
 ---------------------------------
 -- my functions 
 ---------------------------------
+function autoUnbridled(spell, diffusion) -- TODO: we don't want to use diffusion on offensive spells
+  local unbridledSpells = 
+  S{
+    -- Buffs
+    'Harden Shell',
+    'Carcharian Verve',
+    'Mighty Guard',
+    -- Not Buffs
+    'Thunderbolt',
+    'Absolute Terror',
+    'Gates of Hades',
+    'Tourbillion',
+    'Pyric Bulwark',
+    'Blistering Roar',
+    'Cesspool',
+    'Crashing Thunder',
+    'Cruel Joke',
+    'Droning Whirlwind',
+    'Polar Roar',
+    'Tearing Gust',
+    'Uproot',
+    'Bilgestorm',
+    'Bloodrake'
+  }
+  local self = windower.ffxi.get_player()
+  local isUnbridledSpell = unbridledSpells:contains(spell.english)
+  local recastTimers = windower.ffxi.get_ability_recasts()
+  local isUnbridledLearningOnCooldown = recastTimers[81] > 0 -- 81 is code for Unbridled Learning 
+
+  local isUnbridledLearningUp = false
+  for i,v in pairs(self.buffs) do
+    if v == 485 or v == 505 then -- 485 is UnbridledLearning, 505 is UnbridledWisdom
+      isUnbridledLearningUp = true
+      return
+    end
+  end
+
+  if isUnbridledLearningUp then return end -- buff is already up, gtfo
+
+  if isUnbridledSpell and isUnbridledLearningOnCooldown then cancel_spell() return end -- failsafe for when running easyfarm
+
+  if 
+    isUnbridledSpell and 
+    state.AutoUnbridled.value == 'true' and
+    not isUnbridledLearningOnCooldownthen and
+    not isUnbridledLearningUp
+  then
+    windower.add_to_chat(123, "Auto Unbridled: Attempting to use Unbridled Learning")
+    cast_delay(1.1)
+    send_command('@input /ja "Unbridled Learning" <me>')
+  end
+end
+
 function incrementFantodCounter(by)
   windower.add_to_chat(info.fantodCounter)
   if (info.fantodCounter <= 10) then
@@ -501,114 +626,111 @@ function loadBlueMagicTables()
 
     -- Physical spells with no particular (or known) stat mods
     phys = S{
-      'Bilgestorm',
-    },
-    -- Spells with heavy accuracy penalties, that need to prioritize accuracy first.
-    phys_acc = S{
-      'Heavy Strike',
-    },
-    -- Physical spells with Str stat mod
-    str = S{
-      'Battle Dance',
-      'Bloodrake',
-      'Death Scissors',
-      'Dimensional Death',
-      'Empty Thrash',
-      'Quadrastrike',
-      'Saurian Slide',
-      'Sinker Drill',
-      'Spinal Cleave',
-      'Sweeping Gouge',
-      'Uppercut',
-      'Vertical Cleave',
-    },
-    -- Physical spells with Dex stat mod
-    dex = S{
       'Amorphic Spikes',
       'Asuran Claws',
-      'Barbed Crescent',
-      'Claw Cyclone',
-      'Disseverment',
-      'Foot Kick',
-      'Frenetic Rip',
-      'Goblin Rush',
-      'Hysteric Barrage',
-      'Paralyzing Triad',
-      'Seedspray',
-      'Sickle Slash',
-      'Smite of Rage',
-      'Terror Touch',
-      'Thrashing Assault',
-      'Vanity Dive',
-    },
-    -- Physical spells with Vit stat mod
-    vit = S{
+      'Battle Dance',
+      'Benthic Typhoon',
+      'Bilgestorm',
+      'Bloodrake',
+      'Bludgeon',
       'Body Slam',
       'Cannonball',
-      'Delta Thrust',
-      'Glutinous Dart',
-      'Grand Slam',
-      'Power Attack',
-      'Quad. Continuum',
-      'Sprout Smack',
-      'Sub-zero Smash',
-    },
-    -- Physical spells with Agi stat mod
-    agi = S{
-      'Benthic Typhoon',
+      'Claw Cyclone',
+      'Death Scissors',
+      'Dimensional Death',
+      'Disseverment',
+      'Empty Thrash',
       'Feather Storm',
+      'Final Sting',
+      'Foot Kick',
+      'Frenetic Rip',
+      'Frypan',
+      'Glutinous Dart',
+      'Goblin Rush',
+      'Grand Slam',
+      'Head Butt',
+      'Heavy Strike',
       'Helldive',
       'Hydro Shot',
+      'Hysteric Barrage',
       'Jet Stream',
+      'Mandibular Bite',
       'Pinecone Bomb',
+      'Power Attack',
+      'Quad. Continuum',
+      'Quadrastrike',
+      'Queasyshroom',
+      'Ram Charge',
+      'Saurian Slide',
+      'Screwdriver',
+      'Seedspray',
+      'Sickle Slash',
+      'Sinker Drill',
+      'Smite of Rage',
+      'Spinal Cleave',
       'Spiral Spin',
+      'Sprout Smack',
+      'Sudden Lunge',
+      'Tail Slap',
+      'Terror Touch',
+      'Thrashing Assault',
+      'Uppercut',
+      'Vanity Dive',
+      'Vertical Cleave',
+      'Whirl of Rage',
       'Wild Oats',
     },
-    -- Physical spells with Int stat mod
-    phys_int = S{
-      'Mandibular Bite',
-      'Queasyshroom',
-    },
-    -- Physical spells with Mnd stat mod
-    phys_mnd = S{
-      'Ram Charge',
-      'Screwdriver',
-      'Tourbillion',
-    },
-    -- Physical spells with Chr stat mod
-    phys_chr = S{
-      'Bludgeon',
-    },
-    -- Physical spells with HP stat mod
-    hp = S{
-      'Final Sting',
-    },
-    -- Magical spells with the typical Int mod
-    mag_int = S{
+
+    mab = S{
+      'Acrid Stream',
       'Anvil Lightning',
       'Blastbomb',
       'Blazing Bound',
+      'Blinding Fulgor',
+      'Blitzstrahl',
+      'Blood Drain',
       'Bomb Toss',
+      'Cesspool',
+      'Charged Whisker',
+      'Crashing Thunder',
       'Cursed Sphere',
+      'Diffusion Ray',
       'Droning Whirlwind',
       'Embalming Earth',
       'Entomb',
       'Firespit',
       'Foul Waters',
+      'Gates of Hades',
       'Ice Break',
       'Leafstorm',
+      'Light of Penance',
       'Maelstrom',
+      'Magic Hammer',
+      'Mighty Guard',
       'Molting Plumage',
+      'Mysterious Light',
       'Nectarous Deluge',
+      'Polar Roar',
+      'Rail Cannon',
       'Regurgitation',
       'Rending Deluge',
+      'Retinal Glare',
       'Scouring Spate',
+      'Searing Tempest',
+      'Self-Destruct',
       'Silent Storm',
       'Spectral Floe',
       'Subduction',
+      'Tearing Gust',
       'Tem. Upheaval',
+      'Temporal Shift',
+      'Thermal Pulse',
+      'Thunderbolt',
+      'Uproot',
       'Water Bomb',
+      'White Wind',
     },
+
     mag_dark = S{
       'Dark Orb',
       'Death Ray',
@@ -616,35 +738,9 @@ function loadBlueMagicTables()
       'Evryone. Grudge',
       'Palling Salvo',
       'Tenebral Crush',
-    },
-    mag_light = S{
-      'Blinding Fulgor',
-      'Diffusion Ray',
-      'Radiant Breath',
-      'Rail Cannon',
-      'Retinal Glare',
-    },
-    -- Magical spells with a primary Mnd mod
-    mag_mnd = S{
-      'Acrid Stream',
-      'Magic Hammer',
-      'Mind Blast',
-    },
-    -- Magical spells with a primary Chr mod
-    mag_chr = S{
-      'Mysterious Light',
-    },
-    -- Magical spells with a Vit stat mod (on top of Int)
-    mag_vit = S{
-      'Thermal Pulse',
-    },
-    -- Magical spells with a Dex stat mod (on top of Int)
-    mag_dex = S{
-      'Charged Whisker',
-      'Gates of Hades',
-    },
-    -- Magical spells (generally debuffs) that we want to focus on magic accuracy over damage.
-    -- Add Int for damage where available, though.
+    }, 
+
+    -- Spells (generally debuffs) that we want to focus on magic accuracy over damage.
     mag_acc = S{
       '1000 Needles',
       'Absolute Terror',
@@ -679,7 +775,6 @@ function loadBlueMagicTables()
       'Reaving Wind',
       'Sandspin',
       'Sandspray',
-      'Sheep Song',
       'Soporific',
       'Sound Blast',
       'Stinking Gas',
@@ -687,33 +782,13 @@ function loadBlueMagicTables()
       'Venom Shell',
       'Voracious Trunk',
       'Yawn',
-    },
-    -- Breath-based spells
-    breath = S{
-      'Bad Breath',
-      'Flying Hip Press',
-      'Frost Breath',
-      'Heat Breath',
-      'Hecatomb Wave',
-      'Magnetite Cloud',
-      'Poison Breath',
-      'Self-Destruct',
-      'Thunder Breath',
-      'Vapor Spray',
-      'Wind Breath',
-    },
-    -- Stun spells
-    phys_stun = S{
-      'Frypan',
-      'Head Butt',
-      'Sudden Lunge',
-      'Tail slap',
-      'Whirl of Rage',
-    },
-    mag_stun = S{
-      'Blitzstrahl',
-      'Temporal Shift',
-      'Thunderbolt',
+    }, 
+    additional_effect = S{
+      'Paralyzing Triad', -- 20% potency paralyze
+      'Delta Thrust', -- 100/tick plague
+      'Barbed Crescent', -- 30 accuracy down
+      'Sweeping Gouge', -- 16% defense down
+      'Tourbillion',
     },
     -- Healing spells
     heal = S{
@@ -721,9 +796,13 @@ function loadBlueMagicTables()
       'Magic Fruit',
       'Plenilune Embrace',
       'Pollen',
-      'Restoral',
       'Wild Carrot',
-    },
+      'White Wind'
+    }, 
+    heal_self = S{
+      'Restoral',
+    }, 
+
     -- spells that depend on blue magic skill
     blu_skill = S{
       'Barrier Tusk',
@@ -735,11 +814,41 @@ function loadBlueMagicTables()
       'Reactor Cool',
       'Occultation',
       'Cruel Joke',
-    },
-    -- Other general buffs
-    buff = S{
+    }, 
+      
+    breath = S{
+      'Bad Breath',
+      'Flying Hip Press',
+      'Frost Breath',
+      'Heat Breath',
+      'Hecatomb Wave',
+      'Magnetite Cloud',
+      'Poison Breath',
+      'Radiant Breath',
+      'Thunder Breath',
+      'Vapor Spray',
+      'Wind Breath',      
+    }, 
+           
+    sird = S{
+      -- Stuns
+      'Blitzstrahl', -- magic
+      'Frypan', -- physical
+      'Head Butt', -- physical
+      'Sudden Lunge', -- physical
+      'Tail slap', -- physical
+      'Temporal Shift', -- magic
+      'Thunderbolt', -- magic
+      'Whirl of Rage', -- physical
+
+      -- Debuffs
+      "Dream Flower", -- dark-based sleep
+      "Sheep Song", -- light-based sleep
+
+      -- Buffs
       'Amplification',
       'Animating Wail',
+      'Battery Charge',
       'Carcharian Verve',
       'Cocoon',
       'Erratic Flutter',
@@ -757,31 +866,6 @@ function loadBlueMagicTables()
       'Warm-Up',
       'Winds of Promyvion',
       'Zephyr Mantle',
-    },
-    refresh = S{
-      'Battery Charge',
-    },
-    -- Spells that require Unbridled Learning to cast.
-    -- These need to be copied out into the proper areas.  I don't have a set for these, nor should i
-    -- they don't all have the same modifiers
-    unbridled_spells = S{
-      'Absolute Terror',
-      'Bilgestorm',
-      'Blistering Roar',
-      'Bloodrake',
-      'Carcharian Verve',
-      'Cesspool',
-      'Crashing Thunder',
-      'Droning Whirlwind',
-      'Gates of Hades',
-      'Harden Shell',
-      'Mighty Guard',
-      'Polar Roar',
-      'Pyric Bulwark',
-      'Tearing Gust',
-      'Thunderbolt',
-      'Tourbillion',
-      'Uproot',
     },
   }
 end

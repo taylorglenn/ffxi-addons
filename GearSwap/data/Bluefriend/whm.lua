@@ -59,28 +59,40 @@ function user_setup()
   -- jse setup
   ---------------------------------
   gear.bluefriend.whm = {
-    capes = { fast_cast = { name="Alaunus's Cape", augments={'"Fast Cast"+10',}},
-              cure      = { name="Alaunus's Cape", augments={'MND+20','MND+10','"Cure" potency +10%',} }, },
+    capes = 
+    { 
+      fast_cast = { name="Alaunus's Cape", augments={'"Fast Cast"+10',}},
+      cure      = { name="Alaunus's Cape", augments={'"Cure" potency +10%',} }, 
+    },
     
     neck = "Cleric's torque +1",
 
-    artifact = {  head  = "Theo. cap",
-                  body  = "Theo. Bliaut",
-                  hands = "Theophany mitts",
-                  legs  = "Theo. pantaloons",
-                  feet  = "Theo. duckbills" },
+    artifact = 
+    {  
+      head  = "Theo. cap",
+      body  = "Theo. Bliaut",
+      hands = "Theophany mitts",
+      legs  = "Theo. pantaloons",
+      feet  = "Theo. duckbills" 
+    },
   
-    relic = {     head  = "Piety cap",
-                  body  = "Piety Bliaut",
-                  hands = "Piety mitts",
-                  legs  = "Piety pantaloons",
-                  feet  = "Piety duckbills" },
+    relic = 
+    {     
+      head  = "Piety cap",
+      body  = "Piety Bliaut",
+      hands = "Piety mitts",
+      legs  = "Piety pantaloons",
+      feet  = "Piety duckbills" 
+    },
   
-    empyrean = {  head  = "Ebers cap",
-                  body  = "Ebers Bliaut",
-                  hands = "Ebers mitts",
-                  legs  = "Ebers pantaloons",
-                  feet  = "Ebers duckbills" },
+    empyrean = 
+    {  
+      head  = "Ebers cap",
+      body  = "Ebers Bliaut",
+      hands = "Ebers mitts",
+      legs  = "Ebers pantaloons",
+      feet  = "Ebers duckbills" 
+    }
   }
 end
 
@@ -106,22 +118,22 @@ function init_gear_sets()
     -- back
     -- waist
 
-  sets.idle       = 
+  sets.idle = 
 	{ 
 		main = "Chatoyant Staff", -- Malignance Pole is really what you want here.  it has -20% dt
 		  --sub  = "Mensch Strap +1",
 		  --ammo = "Homiliary",
-		  --head = gear.bluefriend.inyanga.head,
-		  --body = gear.bluefriend.whm.artifact.body,
-		  --hands= gear.bluefriend.inyanga.hands,
+		  head = gear.bluefriend.inyanga.head,
+		  body = gear.bluefriend.inyanga.body,
+		  hands= gear.bluefriend.inyanga.hands,
 		  --legs = gear.bluefriend.inyanga.legs,
 		  --feet = gear.bluefriend.inyanga.feet,
 		  --neck = "Bathy choker +1",
-		  --neck = gear.bluefriend.whm.neck,
+		  neck = "Wiglen Gorget",
 		  --ear1 = "Infused earring",
 		  --ear2 = "Etiolation earring",
 		  --ring1= "Defending ring",
-		  --ring2= "Inyanga ring",
+		  ring2= "Inyanga ring",
 		  --back = "Moonbeam cape", -- get a pdt cape, you'll cap mdt with shell
 		  back = "Aptitude Mantle +1",
 		  --waist= "Hachirin-no-obi" 
@@ -135,9 +147,9 @@ function init_gear_sets()
 	{ 
 	  ammo = "Hasty Pinion +1",
 	  head = gear.bluefriend.vanya.head,
-	  body = gear.bluefriend.vanya.body,
+	  body = gear.bluefriend.inyanga.body,
 	  hands= gear.bluefriend.vanya.hands,
-	  legs = gear.bluefriend.vanya.legs,
+	  legs = gear.bluefriend.ayanmo.legs,
 	  feet = gear.bluefriend.vanya.feet,
 	  neck = gear.bluefriend.whm.neck,
 	  ear1 = "Beatific Earring",
@@ -171,7 +183,7 @@ function init_gear_sets()
 	  ear2 = "Enchntr. Earring +1",
     ring1= "Sirona's Ring",
     ring2= "Mediator's Ring",
-    back = gear.bluefriend.whm.capes.fast_cast,
+    back = gear.bluefriend.whm.capes.cure,
     --waist= "Hachirin-no-obi" 
   }
 

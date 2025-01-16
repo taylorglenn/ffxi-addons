@@ -18,8 +18,8 @@
             </flags>
             <padding>3</padding>
             <pos>
-                <x>1725</x>
-                <y>57</y>
+                <x>1363</x>
+                <y>212</y>
             </pos>
             <text>
                 <alpha>255</alpha>
@@ -41,4 +41,17 @@
             </text>
         </text_box_settings>
     </global>
+    <bluefourteen>
+        <text_box_settings>
+            <pos>
+                <x>409</x>
+                <y>210</y>
+            </pos>
+            <text>
+                <fonts>
+
+                </fonts>
+            </text>
+        </text_box_settings>
+    </bluefourteen>
 </settings>

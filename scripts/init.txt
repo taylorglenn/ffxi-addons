@@ -1,0 +1,44 @@
+keyboard_allowmmf 1
+
+console_position 15 50
+console_color 255 255 0 0
+console_displayactivity 1
+console_fadedelay 3500
+console_screendir screenshots
+
+bind f12 showfps
+bind sysrq screenshot jpg hide
+bind ^v paste
+
+-- non-windower luas
+lua l XIPivot
+lua l distance
+lua l autows
+--lua l crabsquad
+lua l equipviewer
+ev pos 1380 60
+--lua l spellspam
+lua l PartyBuffs
+lua l InvSpace
+--lua l beads
+lua l xivparty
+--lua l sparks
+--lua l react
+lua l skillchains
+lua l pointwatch
+lua l organizer
+lua l porterpacker
+lua l itemizer
+lua l autocontrol
+lua l shoppinglist
+lua l steppr
+lua l bstmon
+lua l sellnpc
+lua l send
+lua l superwarp
+lua l xicamera
+xicamera d 10
+xicamera b 10
+--lua l xivpetbar
+--lua l enemybar2
+lua l targetbar

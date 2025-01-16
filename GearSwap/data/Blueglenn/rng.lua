@@ -5,7 +5,6 @@ function get_sets()
   -- Load and initialize the include file.
   mote_include_version = 2
   include('Mote-Include.lua')
-  include('organizer-lib')
 end
 
 ---------------------------------
@@ -29,11 +28,6 @@ end
 set_macros(1, 5)
 
 ---------------------------------
--- organizer 
----------------------------------
-send_command('@input //gs org;wait6; input //gs validate')
-
----------------------------------
 -- job setup
 ---------------------------------
 function job_setup()
@@ -50,7 +44,7 @@ function user_setup()
   ---------------------------------
   -- jse setup
   ---------------------------------
-  gear.blueglenn.rng = {
+  gear.globals.rng = {
     capes = { },
     
     neck = "",
@@ -96,8 +90,8 @@ function init_gear_sets()
   ---------------------------------
   -- idle
   ---------------------------------
-  sets.idle =       { legs = gear.blueglenn.carmine.legs,
-                      feet = gear.blueglenn.rng.feet }
+  sets.idle =       { legs = gear.globals.carmine.legs,
+                      feet = gear.globals.rng.feet }
   ---------------------------------
   -- Melee
   ---------------------------------

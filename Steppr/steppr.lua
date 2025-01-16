@@ -23,10 +23,10 @@ require('coroutine')
 --  Constants           --
 --------------------------
 COMBAT_STATUS = 1
-TP_THRESHOLD = 1000
 DELAY = 3
 MAX_TIME_BETWEEN_WS = 10
 MIN_TIME_BETWEEN_WS = 3
+DEFAULT_TP_THRESHOLD = 1000
 
 --------------------------
 --  System Objects      --
@@ -34,10 +34,14 @@ MIN_TIME_BETWEEN_WS = 3
 all_weapon_skills = {}
 ws_queue = Q{}
 ws_queue_index = 1
+grace_seconds = 0
 aftermath = 0
 stop = true
 busy = false
 last_run = os.time()
+once = false
+once_ws_used = false
+tp_threshold = DEFAULT_TP_THRESHOLD
 
 --------------------------
 --  Configure Settings  --
@@ -176,11 +180,28 @@ end
 
 function handle_aftermath(level) 
   level = tonumber(level)
-  if level < 0 then level = 0 end
+  if level == nil or level < 0 then level = 0 end
   if level > 3 then level = 3 end
   aftermath = level
   notice('aftermath set to level '..level..'.')
   notice('Please keep in mind that this setting only works if the first WS of your chain is a WS that grants aftermath.')
+end
+
+function handle_grace(seconds)
+  seconds = tonumber(seconds)
+  if seconds == nil or seconds < 0 then seconds = 0 end
+  grace_seconds = seconds
+  notice('Grace seconds set to '..grace_seconds)
+end
+
+function handle_once(arg)
+  if (arg) then
+    once = true
+    notice('Will only use the first WS in the queue once per target.')
+    return
+  end
+  once = false
+  notice('Will use the first WS in the queue as often as it comes up')  
 end
 
 function handle_start() 
@@ -197,10 +218,20 @@ function handle_stop()
   reset()
 end
 
+function handle_threshold(tp)
+  tp = tonumber(tp)
+  if tp == nil or tp < DEFAULT_TP_THRESHOLD or tp > 3000 then tp_threshold = DEFAULT_TP_THRESHOLD end
+  tp_threshold = tp
+  notice('TP Threshold set to '..tostring(tp_threshold))
+end
+
+
 function job_change()
   reset()
   handle_stop()
   handle_clear()
+  handle_aftermath(0)
+  handle_threshold(DEFAULT_TP_THRESHOLD)
 end
 
 --------------------------
@@ -217,11 +248,13 @@ end
 function status_change(new, old)
   -- detect transition from combat (status 1) to idle (status 0)
   if old == 1 and new == 0 then
+    once_ws_used = false
     reset()
   end 
 end
 
 function target_change(index)
+  once_ws_used = false
   reset()
 end
 
@@ -295,7 +328,7 @@ end
 
 function get_step_time(step)
   -- we lose a second for each step after the first
-  local time = MAX_TIME_BETWEEN_WS - step
+  local time = MAX_TIME_BETWEEN_WS - step + grace_seconds
   return ter(time < MIN_TIME_BETWEEN_WS, MIN_TIME_BETWEEN_WS, time)
 end
 
@@ -330,7 +363,7 @@ function can_player_ws()
     not stop and
     not busy and
     player.status == COMBAT_STATUS and
-    player.vitals.tp >= TP_THRESHOLD and
+    player.vitals.tp >= tp_threshold and
     not is_player_debuffed() and
     ws_queue[ws_queue_index] ~= nil and 
     not hold_tp()
@@ -368,6 +401,8 @@ end
 function reset()
   busy = false
   ws_queue_index = 1
+
+  if (once and once_ws_used) then ws_queue_index = 2 end
 end
 
 function get_ws_index(ws_name)
@@ -432,8 +467,12 @@ handlers = {
     ['lists'] = handle_print_lists,
     ['queue'] = handle_print_queue,
     ['aftermath'] = handle_aftermath,
+    ['grace'] = handle_grace,
+    ['once'] = handle_once,
     ['start'] = handle_start,
-    ['stop'] = handle_stop
+    ['stop'] = handle_stop,
+    ['tp'] = handle_threshold,
+    ['threshold'] = handle_threshold
 }
 
 function handle_command(cmd, ...)
